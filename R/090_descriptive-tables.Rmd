@@ -1,0 +1,26 @@
+```{r}
+rm(list = setdiff(ls(), lsf.str())[!(setdiff(ls(), lsf.str()) %in% c('params'))])
+source(here::here('R', '002_folder-paths-and-options.R'))
+```
+
+```{r}
+adnimerge <- readRDS(here::here("R_objects", "010_adnimerge.RDS"))
+```
+
+
+# Descriptive Statistics
+
+```{r}
+
+adnimerge %>%
+  group_by(RID) %>%
+  summarise(ORIGPROT = first(ORIGPROT),
+            AGE_bl = first(AGE),
+            PTGENDER = first(PTGENDER)) %>%
+  ungroup() %>%
+  select(ORIGPROT, AGE_bl, PTGENDER) %>%
+  gtsummary::tbl_summary(
+    statistic = list(gtsummary::all_continuous() ~ "{mean} ({sd})",
+                     gtsummary::all_categorical() ~ "{n} ({p}%)"))
+
+```

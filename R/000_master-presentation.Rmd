@@ -1,0 +1,71 @@
+---
+title: 'Generalizing the causal effect of change in PET amyloid and change in cognition observed in ADNI'
+author: 
+  Beth Shaaban, 
+  Danai Chasioti, 
+  Dave Frankowski, 
+  Doug Tommet,  
+  Kan Gianattasio, 
+  Yingyan Wu, 
+  Zachary Kunicki, 
+  Elizabeth Rose Mayeda,
+  Rich Jones
+date: '`r Sys.Date()`'
+output: ioslides_presentation
+---
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+source(here::here('R', '002_folder-paths-and-options.R'))
+source(here::here('R', '005_libraries.R'))
+source(here::here('R', '010_import-data.R'))
+source(here::here('R', '020_clean-ADNI-data.R'))
+source(here::here('R', '021_clean-ADNI-imaging-data.R'))
+source(here::here('R', '022_clean-ADNI-cognitive-data.R'))
+source(here::here('R', '025_clean-HRS-data.R'))
+source(here::here('R', '050_transform-data.R'))
+source(here::here('R', '080_visualize-data.R'))
+source(here::here('R', '090_descriptive-tables.R'))
+source(here::here('R', '100_model1.R'))
+source(here::here('R', '200_model2.R'))
+
+
+```
+
+## Introduction
+
+
+## Background
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+## Conceptual Model
+
+This is causal inference so we should have a DAG somewhere in our presentation, right?
+
+## Descriptive statistics
+
+```{r, echo = FALSE}
+adnimerge <- readRDS(here::here("R_objects", "010_adnimerge.RDS"))
+adnimerge %>%
+  group_by(RID) %>%
+  summarise(ORIGPROT = first(ORIGPROT),
+            AGE_bl = first(AGE),
+            PTGENDER = first(PTGENDER)) %>%
+  ungroup() %>%
+  select(ORIGPROT, AGE_bl, PTGENDER) %>%
+  gtsummary::tbl_summary(
+    statistic = list(gtsummary::all_continuous() ~ "{mean} ({sd})",
+                     gtsummary::all_categorical() ~ "{n} ({p}%)"))
+
+```
+
+## Some convincing output
+
+## Conclusions
+
+## A fun slide
+
+
+
