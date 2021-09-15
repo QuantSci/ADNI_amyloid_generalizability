@@ -11,6 +11,6 @@ hrs_data <- readRDS(here::here("R_objects", "020_analysis01.RDS"))
 
 hrs_data_01 <- hrs_data %>%
   dplyr::filter(ADAMSSID %in% hrs_subsample_ids$adamssid) %>%
-  dplyr::select(ADAMSSID, AAGE, GENDER, EDYRS, ETHNIC, RACE, APOE41Y0N, demcat4, ANMSETOT)
+  dplyr::select(ADAMSSID, AAGE, GENDER, EDYRS, ETHNIC, RACE, APOE41Y0N, demcat4, ANMSETOT, AASAMPWT_F)
 
 saveRDS(hrs_data_01, here::here("R_objects", "025_hrs_data_01.RDS"))

@@ -12,13 +12,30 @@ harmonized <- readRDS(here::here("R_objects", "040_imp_data.RDS")) %>%
 
 lr1 <- glm(dataset ~ AGE + DX + MMSE + GENDER + EDYRS + ETHNICITY + RACE_3CAT + APOE41Y0N,
            data = harmonized,
-           family = "binomial"(link = "logit"))
+           family = "binomial"(link = "logit"),
+           weights = WEIGHT)
 
 summary(lr1)
 
 # Generate IOWs
+# Weights only needed for ADNI
 
 harmonized$predprob <- predict(lr1, type = "response")
 
+sum_weights_hrs <- harmonized %>%
+  dplyr::filter(DATA == "HRS") %>%
+  dplyr::summarize(sum = sum(WEIGHT)) %>%
+  pull()
+
+sum_weights_adni <- harmonized %>%
+  dplyr::filter(DATA == "ADNI") %>%
+  dplyr::summarize(sum = sum(WEIGHT)) %>%
+  pull()
+
+
 harmonized_01 <- harmonized %>%
-  dplyr::mutate(weights = 1/predprob)
+  dplyr::filter(DATA == "ADNI") %>%
+  dplyr::mutate(weights = (1 - predprob) / predprob,
+                std_weights = weights * ((sum_weights_adni + sum_weights_hrs) / sum_weights_hrs))
+
+hist(harmonized_01$std_weights)

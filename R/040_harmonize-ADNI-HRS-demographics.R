@@ -21,7 +21,8 @@ hrs_01 <- hrs %>%
 # In ADNI, age goes out to one decimal place. HRS age is rounded to nearest whole number. Rounded ADNI to be consistent.
 
 adni_02 <- adni_01 %>%
-  dplyr::mutate(AGE = round(AGE, 0))
+  dplyr::mutate(AGE = round(AGE, 0)) %>%
+  dplyr::filter(AGE > 69)
 
 hrs_02 <- hrs_01 %>%
   rename(AGE = AAGE) # giving similar variable name
@@ -140,10 +141,14 @@ hrs_06 <- hrs_05 %>%
 # Add indicator for dataset
 
 adni_08 <- adni_07 %>%
-  dplyr::mutate(DATA = "ADNI")
+  dplyr::mutate(DATA = "ADNI",
+                WEIGHT = 1)
 
 hrs_07 <- hrs_06 %>%
-  dplyr::mutate(DATA = "HRS")
+  dplyr::mutate(DATA = "HRS") %>%
+  dplyr::rename(WEIGHT = AASAMPWT_F)
+
+
 
 # Merge data
 
@@ -155,6 +160,11 @@ merged <- rbind(adni_08, hrs_07)
 merged$APOE41Y0N <- as.factor(merged$APOE41Y0N)
 merged$GENDER <- as.factor(merged$GENDER)
 merged$ETHNICITY <- as.factor(merged$ETHNICITY)
+
+# One participant in ADNI had age = 0, marking as missing and imputing
+
+merged <- merged %>%
+  dplyr::mutate(AGE = dplyr::if_else(ID == 6884 & DATA == "ADNI", NA_real_, as.numeric(AGE)))
 
 set.seed(09042016)
 
