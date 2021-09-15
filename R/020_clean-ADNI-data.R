@@ -73,3 +73,5 @@ adnimerge_03 <- adnimerge %>%
          DX_BL = DX.bl)
 
 haven::write_dta(adnimerge_03, "adni.dta")
+
+saveRDS(adnimerge_03, here::here("R_objects", "020_adnimerge_03.RDS"))

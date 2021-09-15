@@ -21,12 +21,12 @@ ucberkeleyav1451 <- ADNIMERGE::ucberkeleyav1451 %>%
   as_tibble()
 
 # Import HRS data here
-
+hrs_adams_subsample <- haven::read_dta("R:/BM_QuantitativeSciencesPrg/STUDIES/HRSADAMS/data/hrs_adams_subsample.dta")
 
 
 # Save the R object
 saveRDS(adnimerge, here::here("R_objects", "010_adnimerge.RDS"))
 saveRDS(adnimerge_nolabel, here::here("R_objects", "010_adnimerge_nolabel.RDS"))
 saveRDS(ucberkeleyav1451, here::here("R_objects", "010_aucberkeleyav1451.RDS"))
-
+saveRDS(hrs_adams_subsample, here::here("R_objects", "010_hrs_adams_subsample.RDS"))
 
