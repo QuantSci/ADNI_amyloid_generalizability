@@ -164,10 +164,23 @@ hrs_07 %>%
   dplyr::summarise(sum = sum(WEIGHT)) %>%
   pull() # should total to HRS sample size
 
+adni_sample_size <- nrow(adni_08) # remember that we drop participants younger than 70, so cannot use original adni data
+
+sum_weights_adni <- adni_08 %>%
+  dplyr::summarize(sum = sum(WEIGHT)) %>%
+  pull()
+
+
+adni_09 <- adni_08 %>%
+  dplyr::mutate(NEW_WEIGHT = adni_sample_size * (WEIGHT / sum_weights_adni)) %>%  # scaling weights
+  dplyr::select(-WEIGHT) %>%  # drop old weight variable
+  dplyr::rename(WEIGHT = NEW_WEIGHT) # renaming new weight variable to WEIGHT for rbind, below
+
+
 
 # Merge data
 
-merged <- rbind(adni_08, hrs_07)
+merged <- rbind(adni_09, hrs_07)
 
 
 # Imputing missing data
