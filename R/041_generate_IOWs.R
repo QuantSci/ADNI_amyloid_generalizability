@@ -36,6 +36,8 @@ sum_weights_adni <- harmonized %>%
 harmonized_01 <- harmonized %>%
   dplyr::filter(DATA == "ADNI") %>%
   dplyr::mutate(weights = (1 - predprob) / predprob,
-                std_weights = weights * sum_weights_adni / sum_weights_hrs)
+                std_weights = weights * (sum_weights_adni / sum_weights_hrs))
 
 hist(harmonized_01$std_weights)
+
+psych::describe(harmonized_01$std_weights)

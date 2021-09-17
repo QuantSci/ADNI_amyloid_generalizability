@@ -7,7 +7,7 @@ adni <- readRDS(here::here("R_objects", "020_adnimerge_03.RDS")) %>%
   dplyr::select(RID, AGE, PTGENDER, PTEDUCAT, PTETHCAT, PTRACCAT, APOE4, DX, MMSE)
 # Retaining only variables to harmonize in adni
 
-hrs <- readRDS(here::here("R_objects", "025_hrs_data_01.RDS"))
+hrs <- readRDS(here::here("R_objects", "025_hrs_data_02.RDS"))
 
 # Harmonize ID (this is just renaming the ID variables to be consistent)
 
@@ -21,7 +21,7 @@ hrs_01 <- hrs %>%
 # In ADNI, age goes out to one decimal place. HRS age is rounded to nearest whole number. Rounded ADNI to be consistent.
 
 adni_02 <- adni_01 %>%
-  dplyr::mutate(AGE = round(AGE, 0)) %>%
+  dplyr::mutate(AGE = floor(AGE)) %>%
   dplyr::filter(AGE > 69)
 
 hrs_02 <- hrs_01 %>%
@@ -123,13 +123,13 @@ adni_07 <- adni_06 %>%
 
 # Harmonize DX
 # In ADNI, 1  = CN, 2 = MCI, 3 = AD
-# In HRS, 1 = AD/ADRD, 2 = MCI/CIND, 3 = Other, 4 = CN
+# In HRS, 1 = AD, 2 = MCI, 3 = CN
 
 hrs_05 <- hrs_04 %>%
-  dplyr::mutate(DX = dplyr::case_when(demcat4 == 4 ~ 1,
-                                      demcat4 == 1 ~ 3,
+  dplyr::mutate(DX = dplyr::case_when(dxcat == 3 ~ 1, #just flipping 1 and 3 to be consistent with ADNI
+                                      dxcat == 1 ~ 3,
                                       TRUE ~ 2)) %>%
-  dplyr::select(-demcat4)
+  dplyr::select(-dxcat)
 
 hrs_05$DX <- factor(hrs_05$DX, levels = c(1, 2, 3),
                     labels = c("CN", "MCI", "Dementia"))
@@ -144,10 +144,25 @@ adni_08 <- adni_07 %>%
   dplyr::mutate(DATA = "ADNI",
                 WEIGHT = 1)
 
+
+# This line of code gets the HRS sample size and sum of weights, used for rescaling the weights below
+hrs_sample_size <- nrow(hrs)
+
+sum_weights_hrs <- hrs %>%
+  dplyr::summarize(sum = sum(AASAMPWT_F)) %>%
+  pull()
+
+
 hrs_07 <- hrs_06 %>%
   dplyr::mutate(DATA = "HRS") %>%
-  dplyr::rename(WEIGHT = AASAMPWT_F)
+  dplyr::rename(WEIGHT = AASAMPWT_F) %>%
+  dplyr::mutate(NEW_WEIGHT = hrs_sample_size * (WEIGHT / sum_weights_hrs)) %>%  # scaling weights
+  dplyr::select(-WEIGHT) %>%  # drop old weight variable
+  dplyr::rename(WEIGHT = NEW_WEIGHT) # renaming new weight variable to WEIGHT for rbind, below
 
+hrs_07 %>%
+  dplyr::summarise(sum = sum(WEIGHT)) %>%
+  pull() # should total to HRS sample size
 
 
 # Merge data

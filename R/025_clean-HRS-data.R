@@ -5,12 +5,15 @@ hrs <- readRDS(here::here("R_objects", "010_hrs_adams_subsample.RDS"))
 
 hrs_subsample_ids <- hrs %>%
   dplyr::filter(subsample == 1) %>%
-  dplyr::select(adamssid)
+  dplyr::select(adamssid, dxcat) %>%
+  dplyr::rename(ADAMSSID = adamssid)
 
 hrs_data <- readRDS(here::here("R_objects", "020_analysis01.RDS"))
 
 hrs_data_01 <- hrs_data %>%
-  dplyr::filter(ADAMSSID %in% hrs_subsample_ids$adamssid) %>%
-  dplyr::select(ADAMSSID, AAGE, GENDER, EDYRS, ETHNIC, RACE, APOE41Y0N, demcat4, ANMSETOT, AASAMPWT_F)
+  dplyr::filter(ADAMSSID %in% hrs_subsample_ids$ADAMSSID) %>%
+  dplyr::select(ADAMSSID, AAGE, GENDER, EDYRS, ETHNIC, RACE, APOE41Y0N, ANMSETOT, AASAMPWT_F)
 
-saveRDS(hrs_data_01, here::here("R_objects", "025_hrs_data_01.RDS"))
+hrs_data_02 <- left_join(hrs_data_01, hrs_subsample_ids, by = "ADAMSSID")
+
+saveRDS(hrs_data_02, here::here("R_objects", "025_hrs_data_02.RDS"))
