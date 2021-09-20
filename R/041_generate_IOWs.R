@@ -4,7 +4,10 @@ source(here::here('R', '002_folder-paths-and-options.R'))
 # Load Data
 
 harmonized <- readRDS(here::here("R_objects", "040_imp_data.RDS")) %>%
-  dplyr::mutate(dataset = dplyr::if_else(DATA == "HRS", 1, 0)) # recode for LR
+  dplyr::mutate(dataset = dplyr::if_else(DATA == "HRS", 1, 0)) %>%
+  mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
+         HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
+         BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0)) # recode for LR
 
 ## Checking for linear functional form of MMSE, AGE, EDYRS
 
@@ -395,25 +398,21 @@ ggplot() +
   geom_vline(xintercept = -.25, color = "red") +
   geom_vline(xintercept = .25, color = "red")
 
-
+## Now, obtain IOWs and re-check covariate plot
 
 # LR model
 
-lr1 <- glm(dataset ~ AGE + DX + MMSE + GENDER + EDYRS + ETHNICITY + RACE_3CAT + APOE41Y0N,
+lr_maineffect <- glm(dataset ~ rms::rcs(AGE) + DX + rms::rcs(MMSE) + SEXM1F0 + EDYRS + HISP1Y0N + BLACK1Y0N + APOE41Y0N,
            data = harmonized,
            family = "binomial"(link = "logit"),
            weights = WEIGHT)
 
-summary(lr1)
-
-summary(glm(dataset ~ AGE + DX + MMSE + GENDER + EDYRS + ETHNICITY + RACE_3CAT + APOE41Y0N,
-            data = harmonized,
-            family = "binomial"(link = "logit")))
+summary(lr_maineffect)
 
 # Generate IOWs
-# Weights only needed for ADNI
+# Main effects Only
 
-harmonized$predprob <- predict(lr1, type = "response")
+harmonized$predprob_main <- predict(lr_maineffect, type = "response")
 
 sum_weights_hrs <- harmonized %>%
   dplyr::filter(DATA == "HRS") %>%
@@ -426,14 +425,226 @@ sum_weights_adni <- harmonized %>%
   pull()
 
 
-harmonized_01 <- harmonized %>%
-  dplyr::filter(DATA == "ADNI") %>%
-  dplyr::mutate(weights = (1 - predprob) / predprob,
+harmonized_main <- harmonized %>%
+  dplyr::mutate(weights = (1 - predprob_main) / predprob_main,
                 std_weights = weights * (sum_weights_adni / sum_weights_hrs))
 
+harmonzed_main_svydesign <- harmonized_main %>%
+  srvyr::as_survey_design(ids = ID, weight = std_weights)
 
-psych::describeBy(harmonized$predprob, group = harmonized$DATA)
+ipw_main <- harmonzed_main_svydesign %>%
+  group_by(DATA) %>%
+  summarize(mean_age = survey_mean(AGE),
+            std_age = survey_sd(AGE),
+            mean_mmse = survey_mean(MMSE),
+            std_mmse = survey_sd(MMSE),
+            mean_edyrs = survey_mean(EDYRS),
+            std_edyrs = survey_sd(EDYRS),
+            mean_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            std_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            mean_sex = survey_mean(SEXM1F0),
+            std_sex = survey_sd(SEXM1F0),
+            mean_hisp = survey_mean(HISP1Y0N),
+            std_hisp = survey_sd(HISP1Y0N),
+            mean_blackrace = survey_mean(BLACK1Y0N),
+            std_blackrace = survey_sd(BLACK1Y0N))
 
-hist(harmonized_01$std_weights)
+age_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_age", "std_age")
+mmse_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_mmse", "std_mmse")
+edyrs_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_edyrs", "std_edyrs")
+APOE_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_APOE", "std_APOE")
+sex_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_sex", "std_sex")
+hisp_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_hisp", "std_hisp")
+blackrace_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_blackrace", "std_blackrace")
 
-psych::describe(harmonized_01$std_weights)
+std_mean_diff_ipw_main_data <- data.frame(
+  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black"),
+  stdmeandiff = c(age_std_mean_diff_ipw_main, mmse_std_mean_diff_ipw_main, edyrs_std_mean_diff_ipw_main, APOE_std_mean_diff_ipw_main, sex_std_mean_diff_ipw_main,
+                  hisp_std_mean_diff_ipw_main, blackrace_std_mean_diff_ipw_main)
+)
+
+ggplot() +
+  geom_point(data = std_mean_diff_ipw_main_data, aes(y = var, x = stdmeandiff)) +
+  geom_vline(xintercept = 0, color = "black") +
+  geom_vline(xintercept = -.25, color = "red") +
+  geom_vline(xintercept = .25, color = "red")
+
+# Still unbalanced
+
+# Intx with sex
+
+lr_sexintx <- glm(dataset ~ rms::rcs(AGE)*SEXM1F0 + DX*SEXM1F0 + rms::rcs(MMSE)*SEXM1F0 + SEXM1F0 + EDYRS*SEXM1F0 + HISP1Y0N*SEXM1F0 + BLACK1Y0N*SEXM1F0 + APOE41Y0N*SEXM1F0,
+                  data = harmonized,
+                  family = "binomial"(link = "logit"),
+                  weights = WEIGHT)
+
+summary(lr_sexintx)
+
+
+harmonized$predprob_sexintx <- predict(lr_sexintx, type = "response")
+
+sum_weights_hrs <- harmonized %>%
+  dplyr::filter(DATA == "HRS") %>%
+  dplyr::summarize(sum = sum(WEIGHT)) %>%
+  pull()
+
+sum_weights_adni <- harmonized %>%
+  dplyr::filter(DATA == "ADNI") %>%
+  dplyr::summarize(sum = sum(WEIGHT)) %>%
+  pull()
+
+
+harmonized_sexintx <- harmonized %>%
+  dplyr::mutate(weights = (1 - predprob_sexintx) / predprob_sexintx,
+                std_weights = weights * (sum_weights_adni / sum_weights_hrs))
+
+harmonzed_sexintx_svydesign <- harmonized_sexintx %>%
+  srvyr::as_survey_design(ids = ID, weight = std_weights)
+
+ipw_sexintx <- harmonzed_sexintx_svydesign %>%
+  group_by(DATA) %>%
+  summarize(mean_age = survey_mean(AGE),
+            std_age = survey_sd(AGE),
+            mean_mmse = survey_mean(MMSE),
+            std_mmse = survey_sd(MMSE),
+            mean_edyrs = survey_mean(EDYRS),
+            std_edyrs = survey_sd(EDYRS),
+            mean_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            std_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            mean_sex = survey_mean(SEXM1F0),
+            std_sex = survey_sd(SEXM1F0),
+            mean_hisp = survey_mean(HISP1Y0N),
+            std_hisp = survey_sd(HISP1Y0N),
+            mean_blackrace = survey_mean(BLACK1Y0N),
+            std_blackrace = survey_sd(BLACK1Y0N))
+
+age_std_mean_diff_ipw_sexintx <- get_std_mean_diff(ipw_sexintx, "mean_age", "std_age")
+mmse_std_mean_diff_ipw_sexintx <- get_std_mean_diff(ipw_sexintx, "mean_mmse", "std_mmse")
+edyrs_std_mean_diff_ipw_sexintx <- get_std_mean_diff(ipw_sexintx, "mean_edyrs", "std_edyrs")
+APOE_std_mean_diff_ipw_sexintx <- get_std_mean_diff(ipw_sexintx, "mean_APOE", "std_APOE")
+sex_std_mean_diff_ipw_sexintx <- get_std_mean_diff(ipw_sexintx, "mean_sex", "std_sex")
+hisp_std_mean_diff_ipw_sexintx <- get_std_mean_diff(ipw_sexintx, "mean_hisp", "std_hisp")
+blackrace_std_mean_diff_ipw_sexintx <- get_std_mean_diff(ipw_sexintx, "mean_blackrace", "std_blackrace")
+
+std_mean_diff_ipw_sexintx_data <- data.frame(
+  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black"),
+  stdmeandiff = c(age_std_mean_diff_ipw_sexintx, mmse_std_mean_diff_ipw_sexintx, edyrs_std_mean_diff_ipw_sexintx, APOE_std_mean_diff_ipw_sexintx, sex_std_mean_diff_ipw_sexintx,
+                  hisp_std_mean_diff_ipw_sexintx, blackrace_std_mean_diff_ipw_sexintx)
+)
+
+ggplot() +
+  geom_point(data = std_mean_diff_ipw_sexintx_data, aes(y = var, x = stdmeandiff)) +
+  geom_vline(xintercept = 0, color = "black") +
+  geom_vline(xintercept = -.25, color = "red") +
+  geom_vline(xintercept = .25, color = "red")
+
+## Intx with APOE
+
+lr_APOE4intx <- glm(dataset ~ rms::rcs(AGE)*APOE41Y0N + DX*APOE41Y0N + rms::rcs(MMSE)*APOE41Y0N + SEXM1F0*APOE41Y0N + EDYRS*APOE41Y0N + HISP1Y0N*APOE41Y0N + BLACK1Y0N*APOE41Y0N,
+                  data = harmonized,
+                  family = "binomial"(link = "logit"),
+                  weights = WEIGHT)
+
+summary(lr_APOE4intx)
+
+harmonized$predprob_APOE4intx <- predict(lr_APOE4intx, type = "response")
+
+harmonized_APOE4intx <- harmonized %>%
+  dplyr::mutate(weights = (1 - predprob_APOE4intx) / predprob_APOE4intx,
+                std_weights = weights * (sum_weights_adni / sum_weights_hrs))
+
+harmonzed_APOE4intx_svydesign <- harmonized_APOE4intx %>%
+  srvyr::as_survey_design(ids = ID, weight = std_weights)
+
+ipw_APOE4intx <- harmonzed_APOE4intx_svydesign %>%
+  group_by(DATA) %>%
+  summarize(mean_age = survey_mean(AGE),
+            std_age = survey_sd(AGE),
+            mean_mmse = survey_mean(MMSE),
+            std_mmse = survey_sd(MMSE),
+            mean_edyrs = survey_mean(EDYRS),
+            std_edyrs = survey_sd(EDYRS),
+            mean_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            std_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            mean_sex = survey_mean(SEXM1F0),
+            std_sex = survey_sd(SEXM1F0),
+            mean_hisp = survey_mean(HISP1Y0N),
+            std_hisp = survey_sd(HISP1Y0N),
+            mean_blackrace = survey_mean(BLACK1Y0N),
+            std_blackrace = survey_sd(BLACK1Y0N))
+
+age_std_mean_diff_ipw_APOE4intx <- get_std_mean_diff(ipw_APOE4intx, "mean_age", "std_age")
+mmse_std_mean_diff_ipw_APOE4intx <- get_std_mean_diff(ipw_APOE4intx, "mean_mmse", "std_mmse")
+edyrs_std_mean_diff_ipw_APOE4intx <- get_std_mean_diff(ipw_APOE4intx, "mean_edyrs", "std_edyrs")
+APOE_std_mean_diff_ipw_APOE4intx <- get_std_mean_diff(ipw_APOE4intx, "mean_APOE", "std_APOE")
+sex_std_mean_diff_ipw_APOE4intx <- get_std_mean_diff(ipw_APOE4intx, "mean_sex", "std_sex")
+hisp_std_mean_diff_ipw_APOE4intx <- get_std_mean_diff(ipw_APOE4intx, "mean_hisp", "std_hisp")
+blackrace_std_mean_diff_ipw_APOE4intx <- get_std_mean_diff(ipw_APOE4intx, "mean_blackrace", "std_blackrace")
+
+std_mean_diff_ipw_APOE4intx_data <- data.frame(
+  var = c("age", "mmse", "edyrs", "APOE", "APOE4", "hispanic", "black"),
+  stdmeandiff = c(age_std_mean_diff_ipw_APOE4intx, mmse_std_mean_diff_ipw_APOE4intx, edyrs_std_mean_diff_ipw_APOE4intx, APOE_std_mean_diff_ipw_APOE4intx, sex_std_mean_diff_ipw_APOE4intx,
+                  hisp_std_mean_diff_ipw_APOE4intx, blackrace_std_mean_diff_ipw_APOE4intx)
+)
+
+ggplot() +
+  geom_point(data = std_mean_diff_ipw_APOE4intx_data, aes(y = var, x = stdmeandiff)) +
+  geom_vline(xintercept = 0, color = "black") +
+  geom_vline(xintercept = -.25, color = "red") +
+  geom_vline(xintercept = .25, color = "red")
+
+## intx with age
+
+lr_ageintx <- glm(dataset ~ rms::rcs(AGE)*APOE41Y0N + DX*rms::rcs(AGE) + rms::rcs(MMSE)*rms::rcs(AGE) + SEXM1F0*rms::rcs(AGE) + EDYRS*rms::rcs(AGE) + HISP1Y0N*rms::rcs(AGE) + BLACK1Y0N*rms::rcs(AGE),
+                    data = harmonized,
+                    family = "binomial"(link = "logit"),
+                    weights = WEIGHT)
+
+summary(lr_ageintx)
+
+
+harmonized$predprob_ageintx <- predict(lr_ageintx, type = "response")
+
+harmonized_ageintx <- harmonized %>%
+  dplyr::mutate(weights = (1 - predprob_ageintx) / predprob_ageintx,
+                std_weights = weights * (sum_weights_adni / sum_weights_hrs))
+
+harmonzed_ageintx_svydesign <- harmonized_ageintx %>%
+  srvyr::as_survey_design(ids = ID, weight = std_weights)
+
+ipw_ageintx <- harmonzed_ageintx_svydesign %>%
+  group_by(DATA) %>%
+  summarize(mean_age = survey_mean(AGE),
+            std_age = survey_sd(AGE),
+            mean_mmse = survey_mean(MMSE),
+            std_mmse = survey_sd(MMSE),
+            mean_edyrs = survey_mean(EDYRS),
+            std_edyrs = survey_sd(EDYRS),
+            mean_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            std_APOE = survey_mean(as.numeric(APOE41Y0N)),
+            mean_sex = survey_mean(SEXM1F0),
+            std_sex = survey_sd(SEXM1F0),
+            mean_hisp = survey_mean(HISP1Y0N),
+            std_hisp = survey_sd(HISP1Y0N),
+            mean_blackrace = survey_mean(BLACK1Y0N),
+            std_blackrace = survey_sd(BLACK1Y0N))
+
+age_std_mean_diff_ipw_ageintx <- get_std_mean_diff(ipw_ageintx, "mean_age", "std_age")
+mmse_std_mean_diff_ipw_ageintx <- get_std_mean_diff(ipw_ageintx, "mean_mmse", "std_mmse")
+edyrs_std_mean_diff_ipw_ageintx <- get_std_mean_diff(ipw_ageintx, "mean_edyrs", "std_edyrs")
+APOE_std_mean_diff_ipw_ageintx <- get_std_mean_diff(ipw_ageintx, "mean_APOE", "std_APOE")
+sex_std_mean_diff_ipw_ageintx <- get_std_mean_diff(ipw_ageintx, "mean_sex", "std_sex")
+hisp_std_mean_diff_ipw_ageintx <- get_std_mean_diff(ipw_ageintx, "mean_hisp", "std_hisp")
+blackrace_std_mean_diff_ipw_ageintx <- get_std_mean_diff(ipw_ageintx, "mean_blackrace", "std_blackrace")
+
+std_mean_diff_ipw_ageintx_data <- data.frame(
+  var = c("age", "mmse", "edyrs", "APOE", "age", "hispanic", "black"),
+  stdmeandiff = c(age_std_mean_diff_ipw_ageintx, mmse_std_mean_diff_ipw_ageintx, edyrs_std_mean_diff_ipw_ageintx, APOE_std_mean_diff_ipw_ageintx, sex_std_mean_diff_ipw_ageintx,
+                  hisp_std_mean_diff_ipw_ageintx, blackrace_std_mean_diff_ipw_ageintx)
+)
+
+ggplot() +
+  geom_point(data = std_mean_diff_ipw_ageintx_data, aes(y = var, x = stdmeandiff)) +
+  geom_vline(xintercept = 0, color = "black") +
+  geom_vline(xintercept = -.25, color = "red") +
+  geom_vline(xintercept = .25, color = "red")
