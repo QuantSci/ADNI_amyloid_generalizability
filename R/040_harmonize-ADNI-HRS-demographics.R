@@ -156,7 +156,7 @@ sum_weights_hrs <- hrs %>%
 hrs_07 <- hrs_06 %>%
   dplyr::mutate(DATA = "HRS") %>%
   dplyr::rename(WEIGHT = AASAMPWT_F) %>%
-  dplyr::mutate(NEW_WEIGHT = hrs_sample_size * (WEIGHT / sum_weights_hrs)) %>%  # scaling weights
+  dplyr::mutate(NEW_WEIGHT = (hrs_sample_size/sum_weights_hrs) * WEIGHT) %>%  # scaling weights
   dplyr::select(-WEIGHT) %>%  # drop old weight variable
   dplyr::rename(WEIGHT = NEW_WEIGHT) # renaming new weight variable to WEIGHT for rbind, below
 
