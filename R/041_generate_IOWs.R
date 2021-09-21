@@ -7,7 +7,9 @@ harmonized <- readRDS(here::here("R_objects", "040_imp_data.RDS")) %>%
   dplyr::mutate(dataset = dplyr::if_else(DATA == "HRS", 1, 0)) %>%
   mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
          HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
-         BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0)) # recode for LR
+         BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0),
+         MCI1Y0N = dplyr::if_else(DX == "MCI", 1, 0),
+         DEM1Y0N = dplyr::if_else(DX == "Dementia", 1, 0)) # recode for LR
 
 ## Checking for linear functional form of MMSE, AGE, EDYRS
 
@@ -44,142 +46,6 @@ anova(EDYRS_m1, EDYRS_m2, test = "LRT")
 # Assessing covariate balance
 # (mean(ADNI) - mean(HRS)) / st.dev(HRS)
 
-## DX STRATIFIED
-
-covariate_balance_data <- harmonized %>%
-  mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
-         HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
-         BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0)) %>%
-  select(-GENDER, -ETHNICITY, -RACE_3CAT) %>%
-  group_by(DATA, DX) %>%
-  summarise(mean_age = mean(AGE, na.rm = TRUE),
-            std_age = sd(AGE, na.rm = TRUE),
-            mean_mmse = mean(MMSE, na.rm = T),
-            std_mmse = sd(MMSE, na.rm = T),
-            mean_edyrs = mean(EDYRS, na.rm = T),
-            std_edyrs = sd(EDYRS, na.rm = T),
-            mean_APOE = mean(as.numeric(APOE41Y0N), na.rm = T),
-            std_APOE = mean(as.numeric(APOE41Y0N), na.rm = T),
-            mean_sex = mean(SEXM1F0, na.rm = T),
-            std_sex = sd(SEXM1F0, na.rm = T),
-            mean_hisp = mean(HISP1Y0N, na.rm = T),
-            std_hisp = sd(HISP1Y0N, na.rm = T),
-            mean_blackrace = mean(BLACK1Y0N, na.rm = T),
-            std_blackrace = sd(BLACK1Y0N, na.rm = T)) %>%
-  ungroup()
-
-get_dxstrat_std_mean_diff <- function(data, mean_var, sd_var){
-
-mean_hrs_CN <- data %>%
-  filter(DATA == "HRS" & DX == "CN") %>%
-  select(mean_var) %>%
-  pull()
-
-mean_adni_CN <- data %>%
-  filter(DATA == "ADNI" & DX == "CN") %>%
-  select(mean_var) %>%
-  pull()
-
-sd_hrs_CN <- data %>%
-  filter(DATA == "HRS" & DX == "CN") %>%
-  select(sd_var) %>%
-  pull()
-
-mean_hrs_MCI <- data %>%
-  filter(DATA == "HRS" & DX == "MCI") %>%
-  select(mean_var) %>%
-  pull()
-
-mean_adni_MCI <- data %>%
-  filter(DATA == "ADNI" & DX == "MCI") %>%
-  select(mean_var) %>%
-  pull()
-
-sd_hrs_MCI <- data %>%
-  filter(DATA == "HRS" & DX == "MCI") %>%
-  select(sd_var) %>%
-  pull()
-
-mean_hrs_Dementia <- data %>%
-  filter(DATA == "HRS" & DX == "Dementia") %>%
-  select(mean_var) %>%
-  pull()
-
-mean_adni_Dementia <- data %>%
-  filter(DATA == "ADNI" & DX == "Dementia") %>%
-  select(mean_var) %>%
-  pull()
-
-sd_hrs_Dementia <- data %>%
-  filter(DATA == "HRS" & DX == "Dementia") %>%
-  select(sd_var) %>%
-  pull()
-
-
-std_mean_diff_CN <- (mean_adni_CN - mean_hrs_CN) / sd_hrs_CN
-std_mean_diff_MCI <- (mean_adni_MCI - mean_hrs_MCI) / sd_hrs_MCI
-std_mean_diff_Dementia <- (mean_adni_Dementia - mean_hrs_Dementia) / sd_hrs_Dementia
-
-results <- data.frame(
-  DX_group = c("CN", "MCI", "Dementia"),
-  std_mean_diff = c(std_mean_diff_CN, std_mean_diff_MCI, std_mean_diff_Dementia))
-
-return(results)
-
-}
-
-dxstrat_age_std_mean_diff <- get_dxstrat_std_mean_diff(data = covariate_balance_data,
-                                       mean_var = "mean_age",
-                                       sd_var = "std_age") %>%
-  mutate(var = "age")
-
-dxstrat_mmse_std_mean_diff <- get_dxstrat_std_mean_diff(data = covariate_balance_data,
-                                       mean_var = "mean_mmse",
-                                       sd_var = "std_mmse") %>%
-  mutate(var = "mmse")
-
-dxstrat_edyrs_std_mean_diff <- get_dxstrat_std_mean_diff(data = covariate_balance_data,
-                                         mean_var = "mean_edyrs",
-                                         sd_var = "std_edyrs") %>%
-  mutate(var = "edyrs")
-
-dxstrat_APOE_std_mean_diff <- get_dxstrat_std_mean_diff(data = covariate_balance_data,
-                                         mean_var = "mean_APOE",
-                                         sd_var = "std_APOE") %>%
-  mutate(var = "APOE")
-
-dxstrat_sex_std_mean_diff <- get_dxstrat_std_mean_diff(data = covariate_balance_data,
-                                         mean_var = "mean_sex",
-                                         sd_var = "std_sex") %>%
-  mutate(var = "sex")
-
-dxstrat_hisp_std_mean_diff <- get_dxstrat_std_mean_diff(data = covariate_balance_data,
-                                         mean_var = "mean_hisp",
-                                         sd_var = "std_hisp") %>%
-  mutate(var = "hisp")
-
-dxstrat_blackrace_std_mean_diff <- get_dxstrat_std_mean_diff(data = covariate_balance_data,
-                                         mean_var = "mean_blackrace",
-                                         sd_var = "std_blackrace") %>%
-  mutate(var = "blackrace")
-
-
-dxstrat_std_mean_diff_data <- rbind(dxstrat_std_mean_diffage_std_mean_diff,
-                           dxstrat_std_mean_diffmmse_std_mean_diff,
-                           dxstrat_std_mean_diffedyrs_std_mean_diff,
-                           dxstrat_std_mean_diffAPOE_std_mean_diff,
-                           dxstrat_std_mean_diffsex_std_mean_diff,
-                           dxstrat_std_mean_diffhisp_std_mean_diff,
-                           dxstrat_std_mean_diffblackrace_std_mean_diff)
-
-ggplot() +
-  geom_point(data = dxstrat_std_mean_diff_data, aes(y = var, x = std_mean_diff, color = DX_group)) +
-  geom_vline(xintercept = 0, color = "black") +
-  geom_vline(xintercept = -.25, color = "red") +
-  geom_vline(xintercept = .25, color = "red")
-
-# NO DX STRATA
-
 get_std_mean_diff <- function(data, mean_var, sd_var){
 
   mean_hrs <- data %>%
@@ -200,51 +66,6 @@ get_std_mean_diff <- function(data, mean_var, sd_var){
   std_mean_diff <- (mean_adni - mean_hrs) / sd_hrs
 
 }
-
-covariate_balance_data <- harmonized %>%
-  mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
-         HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
-         BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0)) %>%
-  select(-GENDER, -ETHNICITY, -RACE_3CAT) %>%
-  group_by(DATA) %>%
-  summarise(mean_age = mean(AGE, na.rm = TRUE),
-            std_age = sd(AGE, na.rm = TRUE),
-            mean_mmse = mean(MMSE, na.rm = T),
-            std_mmse = sd(MMSE, na.rm = T),
-            mean_edyrs = mean(EDYRS, na.rm = T),
-            std_edyrs = sd(EDYRS, na.rm = T),
-            mean_APOE = mean(as.numeric(APOE41Y0N), na.rm = T),
-            std_APOE = mean(as.numeric(APOE41Y0N), na.rm = T),
-            mean_sex = mean(SEXM1F0, na.rm = T),
-            std_sex = sd(SEXM1F0, na.rm = T),
-            mean_hisp = mean(HISP1Y0N, na.rm = T),
-            std_hisp = sd(HISP1Y0N, na.rm = T),
-            mean_blackrace = mean(BLACK1Y0N, na.rm = T),
-            std_blackrace = sd(BLACK1Y0N, na.rm = T)) %>%
-  ungroup()
-
-age_std_mean_diff <- get_std_mean_diff(covariate_balance_data, "mean_age", "std_age")
-mmse_std_mean_diff <- get_std_mean_diff(covariate_balance_data, "mean_mmse", "std_mmse")
-edyrs_std_mean_diff <- get_std_mean_diff(covariate_balance_data, "mean_edyrs", "std_edyrs")
-APOE_std_mean_diff <- get_std_mean_diff(covariate_balance_data, "mean_APOE", "std_APOE")
-sex_std_mean_diff <- get_std_mean_diff(covariate_balance_data, "mean_sex", "std_sex")
-hisp_std_mean_diff <- get_std_mean_diff(covariate_balance_data, "mean_hisp", "std_hisp")
-blackrace_std_mean_diff <- get_std_mean_diff(covariate_balance_data, "mean_blackrace", "std_blackrace")
-
-std_mean_diff_data <- data.frame(
-  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black"),
-  stdmeandiff = c(age_std_mean_diff, mmse_std_mean_diff, edyrs_std_mean_diff, APOE_std_mean_diff, sex_std_mean_diff,
-                  hisp_std_mean_diff, blackrace_std_mean_diff)
-)
-
-ggplot() +
-  geom_point(data = std_mean_diff_data, aes(y = var, x = stdmeandiff)) +
-  geom_vline(xintercept = 0, color = "black") +
-  geom_vline(xintercept = -.25, color = "red") +
-  geom_vline(xintercept = .25, color = "red")
-
-# WEIGHTED
-
 # create survey objects
 
 hrs_svy_design <- harmonized %>%
@@ -253,8 +74,10 @@ hrs_svy_design <- harmonized %>%
   mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
          HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
          BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0),
-         APOE41Y0N = as.numeric(APOE41Y0N)) %>%
-  select(-GENDER, -ETHNICITY, -RACE_3CAT)
+         APOE41Y0N = as.numeric(APOE41Y0N),
+         MCI1Y0N = dplyr::if_else(DX == "MCI", 1, 0),
+         DEM1Y0N = dplyr::if_else(DX == "Dementia", 1, 0)) %>%
+  select(-GENDER, -ETHNICITY, -RACE_3CAT, -DX)
 
 adni_svy_design <- harmonized %>%
   dplyr::filter(DATA == "ADNI") %>%
@@ -262,8 +85,10 @@ adni_svy_design <- harmonized %>%
   mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
          HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
          BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0),
-         APOE41Y0N = as.numeric(APOE41Y0N)) %>%
-  select(-GENDER, -ETHNICITY, -RACE_3CAT)
+         APOE41Y0N = as.numeric(APOE41Y0N),
+         MCI1Y0N = dplyr::if_else(DX == "MCI", 1, 0),
+         DEM1Y0N = dplyr::if_else(DX == "Dementia", 1, 0)) %>%
+  select(-GENDER, -ETHNICITY, -RACE_3CAT, -DX)
 
 # Age
 
@@ -377,6 +202,38 @@ adni_svy_BLACKRACE_mean <- adni_svy_design %>%
   select(BLACKRACE) %>%
   pull()
 
+#MCI
+
+hrs_svy_MCI_mean <- hrs_svy_design %>%
+  summarize(MCI = survey_mean(MCI1Y0N)) %>%
+  select(MCI) %>%
+  pull()
+
+hrs_svy_MCI_sd <- hrs_svy_design %>%
+  summarise(MCI = survey_sd(MCI1Y0N)) %>%
+  pull()
+
+adni_svy_MCI_mean <- adni_svy_design %>%
+  summarize(MCI = survey_mean(MCI1Y0N)) %>%
+  select(MCI) %>%
+  pull()
+
+#DEM
+
+hrs_svy_DEM_mean <- hrs_svy_design %>%
+  summarize(DEM = survey_mean(DEM1Y0N)) %>%
+  select(DEM) %>%
+  pull()
+
+hrs_svy_DEM_sd <- hrs_svy_design %>%
+  summarise(DEM = survey_sd(DEM1Y0N)) %>%
+  pull()
+
+adni_svy_DEM_mean <- adni_svy_design %>%
+  summarize(DEM = survey_mean(DEM1Y0N)) %>%
+  select(DEM) %>%
+  pull()
+
 AGE_std_mean_diff_svy <- (hrs_svy_age_mean - adni_svy_age_mean) / hrs_svy_age_sd
 MMSE_std_mean_diff_svy <- (hrs_svy_MMSE_mean - adni_svy_MMSE_mean) / hrs_svy_MMSE_sd
 EDYRS_std_mean_diff_svy <- (hrs_svy_EDYRS_mean - adni_svy_EDYRS_mean) / hrs_svy_EDYRS_sd
@@ -384,12 +241,16 @@ APOE_std_mean_diff_svy <- (hrs_svy_APOE_mean - adni_svy_APOE_mean) / hrs_svy_APO
 SEX_std_mean_diff_svy <- (hrs_svy_SEX_mean - adni_svy_SEX_mean) / hrs_svy_SEX_sd
 HISP_std_mean_diff_svy <- (hrs_svy_HISP_mean - adni_svy_HISP_mean) / hrs_svy_HISP_sd
 BLACKRACE_std_mean_diff_svy <- (hrs_svy_BLACKRACE_mean - adni_svy_BLACKRACE_mean) / hrs_svy_BLACKRACE_sd
+MCI_std_mean_diff_svy <- (hrs_svy_MCI_mean - adni_svy_MCI_mean) / hrs_svy_MCI_sd
+DEM_std_mean_diff_svy <- (hrs_svy_DEM_mean - adni_svy_DEM_mean) / hrs_svy_DEM_sd
+
 
 std_mean_diff_data_svy <- data.frame(
-  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black"),
+  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black", "MCI", "dementia"),
   stdmeandiff = c(AGE_std_mean_diff_svy, MMSE_std_mean_diff_svy, EDYRS_std_mean_diff_svy,
                   APOE_std_mean_diff_svy, SEX_std_mean_diff_svy,
-                  HISP_std_mean_diff_svy, BLACKRACE_std_mean_diff_svy)
+                  HISP_std_mean_diff_svy, BLACKRACE_std_mean_diff_svy,
+                  MCI_std_mean_diff_svy, DEM_std_mean_diff_svy)
 )
 
 ggplot() +
@@ -402,7 +263,7 @@ ggplot() +
 
 # LR model
 
-lr_maineffect <- glm(dataset ~ rms::rcs(AGE) + DX + rms::rcs(MMSE) + SEXM1F0 +
+lr_maineffect <- glm(dataset ~ rms::rcs(AGE) + MCI1Y0N + DEM1Y0N + rms::rcs(MMSE) + SEXM1F0 +
                        rms::rcs(EDYRS) + HISP1Y0N + BLACK1Y0N + APOE41Y0N,
            data = harmonized,
            family = "binomial"(link = "logit"),
@@ -434,6 +295,10 @@ sum_IPWs_ADNI <- harmonized_main %>%
   dplyr::summarize(sum = sum(weights)) %>%
   pull() ## Pull sum of the IPWs in just ADNI For scaling
 
+adni_sample_size <- harmonized_main %>%
+  dplyr::filter(DATA == "ADNI") %>%
+  nrow()
+
 harmonized_main <- harmonized_main %>%
    dplyr::mutate(scaled_weights = (adni_sample_size/sum_IPWs_ADNI) * weights) # scale weights
 
@@ -464,7 +329,11 @@ ipw_main <- harmonzed_main_svydesign %>% # calculated std mean diff
             mean_hisp = survey_mean(HISP1Y0N),
             std_hisp = survey_sd(HISP1Y0N),
             mean_blackrace = survey_mean(BLACK1Y0N),
-            std_blackrace = survey_sd(BLACK1Y0N))
+            std_blackrace = survey_sd(BLACK1Y0N),
+            mean_mci = survey_mean(MCI1Y0N),
+            std_mci = survey_sd(MCI1Y0N),
+            mean_dem = survey_mean(DEM1Y0N),
+            std_dem = survey_sd(DEM1Y0N))
 
 age_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_age", "std_age")
 mmse_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_mmse", "std_mmse")
@@ -473,11 +342,13 @@ APOE_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_APOE", "std_APO
 sex_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_sex", "std_sex")
 hisp_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_hisp", "std_hisp")
 blackrace_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_blackrace", "std_blackrace")
+MCI_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_mci", "std_mci")
+DEM_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_dem", "std_dem")
 
 std_mean_diff_ipw_main_data <- data.frame(
-  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black"),
+  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black", "MCI", "dementia"),
   stdmeandiff = c(age_std_mean_diff_ipw_main, mmse_std_mean_diff_ipw_main, edyrs_std_mean_diff_ipw_main, APOE_std_mean_diff_ipw_main, sex_std_mean_diff_ipw_main,
-                  hisp_std_mean_diff_ipw_main, blackrace_std_mean_diff_ipw_main)
+                  hisp_std_mean_diff_ipw_main, blackrace_std_mean_diff_ipw_main, MCI_std_mean_diff_ipw_main, DEM_std_mean_diff_ipw_main)
 )
 
 # make covariate balance plot
@@ -493,7 +364,7 @@ ggplot() +
 # add all two way interactions
 
 
-lr_secondorder <- glm(dataset ~ (rms::rcs(AGE) + DX + rms::rcs(MMSE) + SEXM1F0 +
+lr_secondorder <- glm(dataset ~ (rms::rcs(AGE) + MCI1Y0N + DEM1Y0N + rms::rcs(MMSE) + SEXM1F0 +
                     rms::rcs(EDYRS) + HISP1Y0N + BLACK1Y0N + APOE41Y0N)^2,
                   data = harmonized,
                   family = "binomial"(link = "logit"),
@@ -553,7 +424,11 @@ ipw_secondorder <- harmonzed_secondorder_svydesign %>% # calculated std mean dif
             mean_hisp = survey_mean(HISP1Y0N),
             std_hisp = survey_sd(HISP1Y0N),
             mean_blackrace = survey_mean(BLACK1Y0N),
-            std_blackrace = survey_sd(BLACK1Y0N))
+            std_blackrace = survey_sd(BLACK1Y0N),
+            mean_mci = survey_mean(MCI1Y0N),
+            std_mci = survey_sd(MCI1Y0N),
+            mean_dem = survey_mean(DEM1Y0N),
+            std_dem = survey_sd(DEM1Y0N))
 
 age_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_age", "std_age")
 mmse_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_mmse", "std_mmse")
@@ -562,13 +437,14 @@ APOE_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_A
 sex_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_sex", "std_sex")
 hisp_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_hisp", "std_hisp")
 blackrace_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_blackrace", "std_blackrace")
+MCI_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_mci", "std_mci")
+DEM_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_dem", "std_dem")
 
 std_mean_diff_ipw_secondorder_data <- data.frame(
-  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black"),
+  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black", "MCI", "dem"),
   stdmeandiff = c(age_std_mean_diff_ipw_secondorder, mmse_std_mean_diff_ipw_secondorder, edyrs_std_mean_diff_ipw_secondorder, APOE_std_mean_diff_ipw_secondorder, sex_std_mean_diff_ipw_secondorder,
-                  hisp_std_mean_diff_ipw_secondorder, blackrace_std_mean_diff_ipw_secondorder)
+                  hisp_std_mean_diff_ipw_secondorder, blackrace_std_mean_diff_ipw_secondorder, MCI_std_mean_diff_ipw_secondorder, DEM_std_mean_diff_ipw_secondorder)
 )
-
 # make covariate balance plot
 
 ggplot() +
@@ -579,3 +455,46 @@ ggplot() +
 
 # worse balance than main effects
 
+## Create plot
+
+svy_data <- std_mean_diff_data_svy %>%
+  dplyr::mutate(IPW = "No")
+
+ipw_data <- std_mean_diff_ipw_main_data %>%
+  dplyr::mutate(IPW = "Yes")
+
+plot_data <- rbind(ipw_data, svy_data) %>%
+  dplyr::mutate(names = dplyr::case_when(var == "age" ~ "Age (in Years)",
+                                         var == "mmse" ~ "MMSE",
+                                         var == "hispanic" ~ "Ethnicity",
+                                         var == "edyrs" ~ "Years of Education",
+                                         var == "black" ~ "Black/African American",
+                                         var == "APOE" ~ "APOE4 Allele Present",
+                                         var == "sex" ~ "Gender",
+                                         var == "MCI" ~ "MCI",
+                                         var == "dementia" ~ "Dementia"))
+
+stdmeandiff_plot <- plot_data %>%
+  ggplot(aes(y = names, x = stdmeandiff)) +
+  geom_point(aes(shape = IPW)) +
+  scale_shape_manual(values = c(1, 16)) +
+  geom_line(aes(group = var), color = "black") +
+  geom_vline(xintercept = 0, color = "black") +
+  geom_vline(xintercept = -.25, color = "grey", linetype = "longdash") +
+  geom_vline(xintercept = .25, color = "grey", linetype = "longdash") +
+  theme_classic() +
+  xlab("Standardized mean difference \n (M(ADNI) - M(ADAMS)) / SD(ADAMS)") +
+  theme(axis.title.y = element_blank(),
+        legend.position = "none")
+
+width.is <- 6
+height.is <- 3.7
+scale.is <- 1.5
+
+ggsave( "stdmeandiffplot.png" ,
+        plot = stdmeandiff_plot ,
+        device = NULL ,
+        scale = scale.is ,
+        width = width.is ,
+        height = height.is ,
+        units = "in" )
