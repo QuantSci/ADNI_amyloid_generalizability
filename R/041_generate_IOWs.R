@@ -577,3 +577,5 @@ ggplot() +
   geom_vline(xintercept = -.25, color = "red") +
   geom_vline(xintercept = .25, color = "red")
 
+# worse balance than main effects
+
