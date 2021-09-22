@@ -9,7 +9,9 @@ harmonized <- readRDS(here::here("R_objects", "040_imp_data.RDS")) %>%
          HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
          BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0),
          MCI1Y0N = dplyr::if_else(DX == "MCI", 1, 0),
-         DEM1Y0N = dplyr::if_else(DX == "Dementia", 1, 0)) # recode for LR
+         DEM1Y0N = dplyr::if_else(DX == "Dementia", 1, 0),
+         APOE41Y0N = as.numeric(APOE41Y0N),
+         APOE41Y0N = dplyr::if_else(APOE41Y0N == 2, 1, 0)) # recode for LR
 
 ## Checking for linear functional form of MMSE, AGE, EDYRS
 
@@ -66,6 +68,11 @@ get_std_mean_diff <- function(data, mean_var, sd_var){
   std_mean_diff <- (mean_adni - mean_hrs) / sd_hrs
 
 }
+
+get_cohen_h <- function(p1, p2){
+
+  h <- 2*asin(sqrt(p1))-2*asin(sqrt(p2))
+}
 # create survey objects
 
 hrs_svy_design <- harmonized %>%
@@ -74,7 +81,6 @@ hrs_svy_design <- harmonized %>%
   mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
          HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
          BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0),
-         APOE41Y0N = as.numeric(APOE41Y0N),
          MCI1Y0N = dplyr::if_else(DX == "MCI", 1, 0),
          DEM1Y0N = dplyr::if_else(DX == "Dementia", 1, 0)) %>%
   select(-GENDER, -ETHNICITY, -RACE_3CAT, -DX)
@@ -85,7 +91,6 @@ adni_svy_design <- harmonized %>%
   mutate(SEXM1F0 = dplyr::if_else(GENDER == "1", 1, 0),
          HISP1Y0N = dplyr::if_else(ETHNICITY == "2", 1, 0),
          BLACK1Y0N = dplyr::if_else(RACE_3CAT == "Black", 1, 0),
-         APOE41Y0N = as.numeric(APOE41Y0N),
          MCI1Y0N = dplyr::if_else(DX == "MCI", 1, 0),
          DEM1Y0N = dplyr::if_else(DX == "Dementia", 1, 0)) %>%
   select(-GENDER, -ETHNICITY, -RACE_3CAT, -DX)
@@ -140,121 +145,211 @@ adni_svy_EDYRS_mean <- adni_svy_design %>%
 
 # APOE
 
-hrs_svy_APOE_mean <- hrs_svy_design %>%
-  summarize(APOE = survey_mean(APOE41Y0N)) %>%
-  select(APOE) %>%
+hrs_svy_APOE_Y <- hrs_svy_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 1) %>%
+  select(prop) %>%
   pull()
 
-hrs_svy_APOE_sd <- hrs_svy_design %>%
-  summarise(APOE = survey_sd(APOE41Y0N)) %>%
+hrs_svy_APOE_N <- hrs_svy_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 0) %>%
+  select(prop) %>%
   pull()
 
-adni_svy_APOE_mean <- adni_svy_design %>%
-  summarize(APOE = survey_mean(APOE41Y0N)) %>%
-  select(APOE) %>%
+adni_svy_APOE_Y <- adni_svy_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_svy_APOE_N <- adni_svy_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 0) %>%
+  select(prop) %>%
   pull()
 
 # SEX
 
-hrs_svy_SEX_mean <- hrs_svy_design %>%
-  summarize(SEX = survey_mean(SEXM1F0)) %>%
-  select(SEX) %>%
+hrs_svy_SEX_M <- hrs_svy_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 1) %>%
+  select(prop) %>%
   pull()
 
-hrs_svy_SEX_sd <- hrs_svy_design %>%
-  summarise(SEX = survey_sd(SEXM1F0)) %>%
+hrs_svy_SEX_F <- hrs_svy_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 0) %>%
+  select(prop) %>%
   pull()
 
-adni_svy_SEX_mean <- adni_svy_design %>%
-  summarize(SEX = survey_mean(SEXM1F0)) %>%
-  select(SEX) %>%
+adni_svy_SEX_M <- adni_svy_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_svy_SEX_F <- adni_svy_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 0) %>%
+  select(prop) %>%
   pull()
 
 # HISP
 
-hrs_svy_HISP_mean <- hrs_svy_design %>%
-  summarize(HISP = survey_mean(HISP1Y0N)) %>%
-  select(HISP) %>%
+hrs_svy_HISP_Y <- hrs_svy_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 1) %>%
+  select(prop) %>%
   pull()
 
-hrs_svy_HISP_sd <- hrs_svy_design %>%
-  summarise(HISP = survey_sd(HISP1Y0N)) %>%
+hrs_svy_HISP_N <- hrs_svy_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 0) %>%
+  select(prop) %>%
   pull()
 
-adni_svy_HISP_mean <- adni_svy_design %>%
-  summarize(HISP = survey_mean(HISP1Y0N)) %>%
-  select(HISP) %>%
+adni_svy_HISP_Y <- adni_svy_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 1) %>%
+  select(prop) %>%
   pull()
+
+adni_svy_HISP_N <- adni_svy_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
 
 # BLACKRACE
 
-hrs_svy_BLACKRACE_mean <- hrs_svy_design %>%
-  summarize(BLACKRACE = survey_mean(BLACK1Y0N)) %>%
-  select(BLACKRACE) %>%
+hrs_svy_BLACK_Y <- hrs_svy_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 1) %>%
+  select(prop) %>%
   pull()
 
-hrs_svy_BLACKRACE_sd <- hrs_svy_design %>%
-  summarise(BLACKRACE = survey_sd(BLACK1Y0N)) %>%
+hrs_svy_BLACK_N <- hrs_svy_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 0) %>%
+  select(prop) %>%
   pull()
 
-adni_svy_BLACKRACE_mean <- adni_svy_design %>%
-  summarize(BLACKRACE = survey_mean(BLACK1Y0N)) %>%
-  select(BLACKRACE) %>%
+adni_svy_BLACK_Y <- adni_svy_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 1) %>%
+  select(prop) %>%
   pull()
+
+adni_svy_BLACK_N <- adni_svy_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
 
 #MCI
 
-hrs_svy_MCI_mean <- hrs_svy_design %>%
-  summarize(MCI = survey_mean(MCI1Y0N)) %>%
-  select(MCI) %>%
+hrs_svy_MCI_Y <- hrs_svy_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 1) %>%
+  select(prop) %>%
   pull()
 
-hrs_svy_MCI_sd <- hrs_svy_design %>%
-  summarise(MCI = survey_sd(MCI1Y0N)) %>%
+hrs_svy_MCI_N <- hrs_svy_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 0) %>%
+  select(prop) %>%
   pull()
 
-adni_svy_MCI_mean <- adni_svy_design %>%
-  summarize(MCI = survey_mean(MCI1Y0N)) %>%
-  select(MCI) %>%
+adni_svy_MCI_Y <- adni_svy_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 1) %>%
+  select(prop) %>%
   pull()
+
+adni_svy_MCI_N <- adni_svy_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
 
 #DEM
 
-hrs_svy_DEM_mean <- hrs_svy_design %>%
-  summarize(DEM = survey_mean(DEM1Y0N)) %>%
-  select(DEM) %>%
+hrs_svy_DEM_Y <- hrs_svy_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 1) %>%
+  select(prop) %>%
   pull()
 
-hrs_svy_DEM_sd <- hrs_svy_design %>%
-  summarise(DEM = survey_sd(DEM1Y0N)) %>%
+hrs_svy_DEM_N <- hrs_svy_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 0) %>%
+  select(prop) %>%
   pull()
 
-adni_svy_DEM_mean <- adni_svy_design %>%
-  summarize(DEM = survey_mean(DEM1Y0N)) %>%
-  select(DEM) %>%
+adni_svy_DEM_Y <- adni_svy_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 1) %>%
+  select(prop) %>%
   pull()
 
-AGE_std_mean_diff_svy <- (hrs_svy_age_mean - adni_svy_age_mean) / hrs_svy_age_sd
-MMSE_std_mean_diff_svy <- (hrs_svy_MMSE_mean - adni_svy_MMSE_mean) / hrs_svy_MMSE_sd
-EDYRS_std_mean_diff_svy <- (hrs_svy_EDYRS_mean - adni_svy_EDYRS_mean) / hrs_svy_EDYRS_sd
-APOE_std_mean_diff_svy <- (hrs_svy_APOE_mean - adni_svy_APOE_mean) / hrs_svy_APOE_sd
-SEX_std_mean_diff_svy <- (hrs_svy_SEX_mean - adni_svy_SEX_mean) / hrs_svy_SEX_sd
-HISP_std_mean_diff_svy <- (hrs_svy_HISP_mean - adni_svy_HISP_mean) / hrs_svy_HISP_sd
-BLACKRACE_std_mean_diff_svy <- (hrs_svy_BLACKRACE_mean - adni_svy_BLACKRACE_mean) / hrs_svy_BLACKRACE_sd
-MCI_std_mean_diff_svy <- (hrs_svy_MCI_mean - adni_svy_MCI_mean) / hrs_svy_MCI_sd
-DEM_std_mean_diff_svy <- (hrs_svy_DEM_mean - adni_svy_DEM_mean) / hrs_svy_DEM_sd
+adni_svy_DEM_N <- adni_svy_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+# Calculate effect sizes
+
+AGE_effect_size_svy <- (hrs_svy_age_mean - adni_svy_age_mean) / hrs_svy_age_sd
+MMSE_effect_size_svy <- (hrs_svy_MMSE_mean - adni_svy_MMSE_mean) / hrs_svy_MMSE_sd
+EDYRS_effect_size_svy <- (hrs_svy_EDYRS_mean - adni_svy_EDYRS_mean) / hrs_svy_EDYRS_sd
+APOE_effect_size_svy <- get_cohen_h(hrs_svy_APOE_Y, adni_svy_APOE_Y)
+SEX_effect_size_svy <- get_cohen_h(hrs_svy_SEX_F, adni_svy_SEX_F)
+HISP_effect_size_svy <- get_cohen_h(hrs_svy_HISP_Y, adni_svy_HISP_Y)
+BLACK_effect_size_svy <- get_cohen_h(hrs_svy_BLACK_Y, adni_svy_BLACK_Y)
+MCI_effect_size_svy <- get_cohen_h(hrs_svy_MCI_Y, adni_svy_MCI_Y)
+DEM_effect_size_svy <- get_cohen_h(hrs_svy_DEM_Y, adni_svy_DEM_Y)
 
 
-std_mean_diff_data_svy <- data.frame(
-  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black", "MCI", "dementia"),
-  stdmeandiff = c(AGE_std_mean_diff_svy, MMSE_std_mean_diff_svy, EDYRS_std_mean_diff_svy,
-                  APOE_std_mean_diff_svy, SEX_std_mean_diff_svy,
-                  HISP_std_mean_diff_svy, BLACKRACE_std_mean_diff_svy,
-                  MCI_std_mean_diff_svy, DEM_std_mean_diff_svy)
+effect_size_data_svy <- data.frame(
+  var = c("female", "age", "black", "hispanic", "edyrs", "mmse", "MCI", "dem", "APOE"),
+  stdmeandiff = c(SEX_effect_size_svy, AGE_effect_size_svy,
+                  BLACK_effect_size_svy, HISP_effect_size_svy,
+                  EDYRS_effect_size_svy, MMSE_effect_size_svy,
+                  MCI_effect_size_svy, DEM_effect_size_svy,
+                  APOE_effect_size_svy)
 )
 
 ggplot() +
-  geom_point(data = std_mean_diff_data_svy, aes(y = var, x = stdmeandiff)) +
+  geom_point(data = effect_size_data_svy, aes(y = var, x = stdmeandiff)) +
   geom_vline(xintercept = 0, color = "black") +
   geom_vline(xintercept = -.25, color = "red") +
   geom_vline(xintercept = .25, color = "red")
@@ -311,171 +406,265 @@ survey_data_HRS <- harmonized_main %>%
 
 survey_data <- rbind(survey_data_ADNI, survey_data_HRS)
 
-harmonzed_main_svydesign <- survey_data %>%
+harmonized_main_svydesign <- survey_data %>%
   srvyr::as_survey_design(ids = ID, weight = scaled_weights) #survey design for st mean diff
 
-ipw_main <- harmonzed_main_svydesign %>% # calculated std mean diff
+ipw_main <- harmonized_main_svydesign %>% # calculated std mean diff
   group_by(DATA) %>%
   summarize(mean_age = survey_mean(AGE),
             std_age = survey_sd(AGE),
             mean_mmse = survey_mean(MMSE),
             std_mmse = survey_sd(MMSE),
             mean_edyrs = survey_mean(EDYRS),
-            std_edyrs = survey_sd(EDYRS),
-            mean_APOE = survey_mean(as.numeric(APOE41Y0N)),
-            std_APOE = survey_mean(as.numeric(APOE41Y0N)),
-            mean_sex = survey_mean(SEXM1F0),
-            std_sex = survey_sd(SEXM1F0),
-            mean_hisp = survey_mean(HISP1Y0N),
-            std_hisp = survey_sd(HISP1Y0N),
-            mean_blackrace = survey_mean(BLACK1Y0N),
-            std_blackrace = survey_sd(BLACK1Y0N),
-            mean_mci = survey_mean(MCI1Y0N),
-            std_mci = survey_sd(MCI1Y0N),
-            mean_dem = survey_mean(DEM1Y0N),
-            std_dem = survey_sd(DEM1Y0N))
+            std_edyrs = survey_sd(EDYRS))
 
-age_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_age", "std_age")
-mmse_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_mmse", "std_mmse")
-edyrs_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_edyrs", "std_edyrs")
-APOE_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_APOE", "std_APOE")
-sex_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_sex", "std_sex")
-hisp_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_hisp", "std_hisp")
-blackrace_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_blackrace", "std_blackrace")
-MCI_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_mci", "std_mci")
-DEM_std_mean_diff_ipw_main <- get_std_mean_diff(ipw_main, "mean_dem", "std_dem")
+# now calculate cohen's h
 
-std_mean_diff_ipw_main_data <- data.frame(
-  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black", "MCI", "dementia"),
-  stdmeandiff = c(age_std_mean_diff_ipw_main, mmse_std_mean_diff_ipw_main, edyrs_std_mean_diff_ipw_main, APOE_std_mean_diff_ipw_main, sex_std_mean_diff_ipw_main,
-                  hisp_std_mean_diff_ipw_main, blackrace_std_mean_diff_ipw_main, MCI_std_mean_diff_ipw_main, DEM_std_mean_diff_ipw_main)
+hrs_ipw_design <- survey_data_HRS %>%
+  srvyr::as_survey_design(ids = ID, weight = scaled_weights)
+
+adni_ipw_design <- survey_data_ADNI %>%
+  srvyr::as_survey_design(ids = ID, weight = scaled_weights)
+
+# APOE
+
+hrs_ipw_APOE_Y <- hrs_ipw_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+hrs_ipw_APOE_N <- hrs_ipw_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_APOE_Y <- adni_ipw_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_APOE_N <- adni_ipw_design %>%
+  group_by(APOE41Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(APOE41Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+# SEX
+
+hrs_ipw_SEX_M <- hrs_ipw_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 1) %>%
+  select(prop) %>%
+  pull()
+
+hrs_ipw_SEX_F <- hrs_ipw_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 0) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_SEX_M <- adni_ipw_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_SEX_F <- adni_ipw_design %>%
+  group_by(SEXM1F0) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(SEXM1F0 == 0) %>%
+  select(prop) %>%
+  pull()
+
+# HISP
+
+hrs_ipw_HISP_Y <- hrs_ipw_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+hrs_ipw_HISP_N <- hrs_ipw_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_HISP_Y <- adni_ipw_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_HISP_N <- adni_ipw_design %>%
+  group_by(HISP1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(HISP1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+
+# BLACKRACE
+
+hrs_ipw_BLACK_Y <- hrs_ipw_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+hrs_ipw_BLACK_N <- hrs_ipw_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_BLACK_Y <- adni_ipw_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_BLACK_N <- adni_ipw_design %>%
+  group_by(BLACK1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(BLACK1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+
+#MCI
+
+hrs_ipw_MCI_Y <- hrs_ipw_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+hrs_ipw_MCI_N <- hrs_ipw_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_MCI_Y <- adni_ipw_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_MCI_N <- adni_ipw_design %>%
+  group_by(MCI1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(MCI1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+
+#DEM
+
+hrs_ipw_DEM_Y <- hrs_ipw_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+hrs_ipw_DEM_N <- hrs_ipw_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_DEM_Y <- adni_ipw_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 1) %>%
+  select(prop) %>%
+  pull()
+
+adni_ipw_DEM_N <- adni_ipw_design %>%
+  group_by(DEM1Y0N) %>%
+  summarize(prop = survey_mean()) %>%
+  filter(DEM1Y0N == 0) %>%
+  select(prop) %>%
+  pull()
+
+
+
+age_effect_size_ipw_main <- get_std_mean_diff(ipw_main, "mean_age", "std_age")
+mmse_effect_size_ipw_main <- get_std_mean_diff(ipw_main, "mean_mmse", "std_mmse")
+edyrs_effect_size_ipw_main <- get_std_mean_diff(ipw_main, "mean_edyrs", "std_edyrs")
+APOE_effect_size_ipw_main      <- get_cohen_h(hrs_ipw_APOE_Y, adni_ipw_APOE_Y)
+sex_effect_size_ipw_main      <- get_cohen_h(hrs_ipw_SEX_F, adni_ipw_SEX_F)
+hisp_effect_size_ipw_main      <- get_cohen_h(hrs_ipw_HISP_Y, adni_ipw_HISP_Y)
+blackrace_effect_size_ipw_main <- get_cohen_h(hrs_ipw_BLACK_Y, adni_ipw_BLACK_Y)
+MCI_effect_size_ipw_main       <- get_cohen_h(hrs_ipw_MCI_Y, adni_ipw_MCI_Y)
+DEM_effect_size_ipw_main       <- get_cohen_h(hrs_ipw_DEM_Y, adni_ipw_DEM_Y)
+
+effect_size_ipw_main_data <- data.frame(
+  var = c("female", "age", "black", "hispanic", "edyrs", "mmse", "MCI", "dem", "APOE"),
+  stdmeandiff = c(sex_effect_size_ipw_main, age_effect_size_ipw_main,
+                  blackrace_effect_size_ipw_main, hisp_effect_size_ipw_main,
+                  edyrs_effect_size_ipw_main, mmse_effect_size_ipw_main,
+                  MCI_effect_size_ipw_main, DEM_effect_size_ipw_main,
+                  APOE_effect_size_ipw_main)
 )
 
 # make covariate balance plot
 
 ggplot() +
-  geom_point(data = std_mean_diff_ipw_main_data, aes(y = var, x = stdmeandiff)) +
+  geom_point(data = effect_size_ipw_main_data, aes(y = var, x = stdmeandiff)) +
   geom_vline(xintercept = 0, color = "black") +
   geom_vline(xintercept = -.25, color = "red") +
   geom_vline(xintercept = .25, color = "red")
 
 # Looks good, but a bit high on MMSE and hispanic
-
-# add all two way interactions
-
-
-lr_secondorder <- glm(dataset ~ (rms::rcs(AGE) + MCI1Y0N + DEM1Y0N + rms::rcs(MMSE) + SEXM1F0 +
-                    rms::rcs(EDYRS) + HISP1Y0N + BLACK1Y0N + APOE41Y0N)^2,
-                  data = harmonized,
-                  family = "binomial"(link = "logit"),
-                  weights = WEIGHT)
-
-summary(lr_secondorder)
-
-
-harmonized$predprob_secondorder <- predict(lr_secondorder, type = "response")
-
-sum_weights_hrs <- harmonized %>%
-  dplyr::filter(DATA == "HRS") %>%
-  dplyr::summarize(sum = sum(WEIGHT)) %>%
-  pull()
-
-sum_weights_adni <- harmonized %>%
-  dplyr::filter(DATA == "ADNI") %>%
-  dplyr::summarize(sum = sum(WEIGHT)) %>%
-  pull()
-
-harmonized_secondorder <- harmonized %>%
-  dplyr::mutate(weights = predprob_secondorder / (1 - predprob_secondorder))
-# ppt formula was backwards, was initially 1-predprob / predprob
-
-sum_IPWs_ADNI <- harmonized_secondorder %>%
-  dplyr::filter(DATA == "ADNI") %>%
-  dplyr::summarize(sum = sum(weights)) %>%
-  pull() ## Pull sum of the IPWs in just ADNI For scaling
-
-harmonized_secondorder <- harmonized_secondorder %>%
-  dplyr::mutate(scaled_weights = (adni_sample_size/sum_IPWs_ADNI) * weights) # scale weights
-
-survey_data_ADNI <- harmonized_secondorder %>%
-  dplyr::filter(DATA == "ADNI") # want scaled weights ONLY IN ADNI
-
-survey_data_HRS <- harmonized_secondorder %>%
-  dplyr::filter(DATA == "HRS") %>% # want original ADAMS weights, so rename them to scaled_weights to make the rbind in the next step
-  dplyr::mutate(scaled_weights = WEIGHT)
-
-survey_data <- rbind(survey_data_ADNI, survey_data_HRS)
-
-harmonzed_secondorder_svydesign <- survey_data %>%
-  srvyr::as_survey_design(ids = ID, weight = scaled_weights) #survey design for st mean diff
-
-ipw_secondorder <- harmonzed_secondorder_svydesign %>% # calculated std mean diff
-  group_by(DATA) %>%
-  summarize(mean_age = survey_mean(AGE),
-            std_age = survey_sd(AGE),
-            mean_mmse = survey_mean(MMSE),
-            std_mmse = survey_sd(MMSE),
-            mean_edyrs = survey_mean(EDYRS),
-            std_edyrs = survey_sd(EDYRS),
-            mean_APOE = survey_mean(as.numeric(APOE41Y0N)),
-            std_APOE = survey_mean(as.numeric(APOE41Y0N)),
-            mean_sex = survey_mean(SEXM1F0),
-            std_sex = survey_sd(SEXM1F0),
-            mean_hisp = survey_mean(HISP1Y0N),
-            std_hisp = survey_sd(HISP1Y0N),
-            mean_blackrace = survey_mean(BLACK1Y0N),
-            std_blackrace = survey_sd(BLACK1Y0N),
-            mean_mci = survey_mean(MCI1Y0N),
-            std_mci = survey_sd(MCI1Y0N),
-            mean_dem = survey_mean(DEM1Y0N),
-            std_dem = survey_sd(DEM1Y0N))
-
-age_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_age", "std_age")
-mmse_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_mmse", "std_mmse")
-edyrs_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_edyrs", "std_edyrs")
-APOE_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_APOE", "std_APOE")
-sex_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_sex", "std_sex")
-hisp_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_hisp", "std_hisp")
-blackrace_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_blackrace", "std_blackrace")
-MCI_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_mci", "std_mci")
-DEM_std_mean_diff_ipw_secondorder <- get_std_mean_diff(ipw_secondorder, "mean_dem", "std_dem")
-
-std_mean_diff_ipw_secondorder_data <- data.frame(
-  var = c("age", "mmse", "edyrs", "APOE", "sex", "hispanic", "black", "MCI", "dem"),
-  stdmeandiff = c(age_std_mean_diff_ipw_secondorder, mmse_std_mean_diff_ipw_secondorder, edyrs_std_mean_diff_ipw_secondorder, APOE_std_mean_diff_ipw_secondorder, sex_std_mean_diff_ipw_secondorder,
-                  hisp_std_mean_diff_ipw_secondorder, blackrace_std_mean_diff_ipw_secondorder, MCI_std_mean_diff_ipw_secondorder, DEM_std_mean_diff_ipw_secondorder)
-)
-# make covariate balance plot
-
-ggplot() +
-  geom_point(data = std_mean_diff_ipw_secondorder_data, aes(y = var, x = stdmeandiff)) +
-  geom_vline(xintercept = 0, color = "black") +
-  geom_vline(xintercept = -.25, color = "red") +
-  geom_vline(xintercept = .25, color = "red")
-
-# worse balance than main effects
+# Tried second order interactions, worse balance than main effects
+# Stuck with main effects
 
 ## Create plot
 
-svy_data <- std_mean_diff_data_svy %>%
+svy_data <- effect_size_data_svy %>%
   dplyr::mutate(IPW = "No")
 
-ipw_data <- std_mean_diff_ipw_main_data %>%
+ipw_data <- effect_size_ipw_main_data %>%
   dplyr::mutate(IPW = "Yes")
 
 plot_data <- rbind(ipw_data, svy_data) %>%
-  dplyr::mutate(names = dplyr::case_when(var == "age" ~ "Age (in Years)",
+  dplyr::mutate(names = dplyr::case_when(var == "age" ~ "Age (in years)",
                                          var == "mmse" ~ "MMSE",
-                                         var == "hispanic" ~ "Ethnicity",
-                                         var == "edyrs" ~ "Years of Education",
+                                         var == "hispanic" ~ "Hispanic ethnicity",
+                                         var == "edyrs" ~ "Years of education",
                                          var == "black" ~ "Black/African American",
-                                         var == "APOE" ~ "APOE4 Allele Present",
-                                         var == "sex" ~ "Gender",
+                                         var == "APOE" ~ "APOEe4 Allele present",
+                                         var == "female" ~ "Female sex",
                                          var == "MCI" ~ "MCI",
-                                         var == "dementia" ~ "Dementia"))
+                                         var == "dem" ~ "Dementia"))
+
+
 
 stdmeandiff_plot <- plot_data %>%
-  ggplot(aes(y = names, x = stdmeandiff)) +
+  ggplot(aes(y = fct_inorder(names), x = stdmeandiff)) +
   geom_point(aes(shape = IPW)) +
   scale_shape_manual(values = c(1, 16)) +
   geom_line(aes(group = var), color = "black") +
@@ -483,13 +672,13 @@ stdmeandiff_plot <- plot_data %>%
   geom_vline(xintercept = -.25, color = "grey", linetype = "longdash") +
   geom_vline(xintercept = .25, color = "grey", linetype = "longdash") +
   theme_classic() +
-  xlab("Standardized mean difference \n (M(ADNI) - M(ADAMS)) / SD(ADAMS)") +
+  xlab("Effect size") +
   theme(axis.title.y = element_blank(),
         legend.position = "none")
 
 width.is <- 6
 height.is <- 3.7
-scale.is <- 1.5
+scale.is <- .9
 
 ggsave( "stdmeandiffplot.png" ,
         plot = stdmeandiff_plot ,
