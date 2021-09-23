@@ -665,12 +665,13 @@ plot_data <- rbind(ipw_data, svy_data) %>%
 
 stdmeandiff_plot <- plot_data %>%
   ggplot(aes(y = fct_inorder(names), x = stdmeandiff)) +
-  geom_point(aes(shape = IPW)) +
-  scale_shape_manual(values = c(1, 16)) +
-  geom_line(aes(group = var), color = "black") +
   geom_vline(xintercept = 0, color = "black") +
   geom_vline(xintercept = -.25, color = "grey", linetype = "longdash") +
   geom_vline(xintercept = .25, color = "grey", linetype = "longdash") +
+  geom_point(aes(color = IPW)) +
+  scale_color_manual(values = c("snow", "black")) +
+#  scale_shape_manual(values = c(1, 1)) +
+  geom_line(aes(group = var), color = "black") +
   theme_classic() +
   xlab("Effect size") +
   theme(axis.title.y = element_blank(),
@@ -680,10 +681,47 @@ width.is <- 6
 height.is <- 3.7
 scale.is <- .9
 
-ggsave( "stdmeandiffplot.png" ,
+ggsave( "stdmeandiffplot.pdf" ,
         plot = stdmeandiff_plot ,
         device = NULL ,
         scale = scale.is ,
         width = width.is ,
         height = height.is ,
         units = "in" )
+
+covbalanceplot <- pdftools::pdf_render_page("stdmeandiffplot.pdf", page = 1, dpi = 600)
+
+png::writePNG(covbalanceplot, "covbalanceplot.png")
+
+
+
+## Assess overlap of participation
+
+adni_predprob_data <- harmonized_main %>%
+  dplyr::filter(DATA == "ADNI")
+
+hrs_predprob_data <- harmonized_main %>%
+  dplyr::filter(DATA == "HRS")
+
+
+proboverlap_plot <- ggplot() +
+  geom_density(data = adni_predprob_data, aes(x = predprob_main)) +
+  geom_density(data = hrs_predprob_data, aes(x = predprob_main), linetype = "dashed") +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank()) +
+  ylab("Density")
+
+ggsave( "proboverlap_plot.pdf" ,
+        plot = proboverlap_plot ,
+        device = NULL ,
+        scale = scale.is ,
+        width = width.is ,
+        height = height.is ,
+        units = "in" )
+
+proboverlap <- pdftools::pdf_render_page("proboverlap_plot.pdf", page = 1, dpi = 600)
+
+png::writePNG(proboverlap, "proboverlap.png")
