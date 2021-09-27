@@ -57,6 +57,105 @@ fbb_02 <- sjlabelled::remove_all_labels(fbb_01)
 amy_pet_01 <- bind_rows(av45_02, fbb_02) %>%
   dplyr::mutate(EXAMDATE = as_date(EXAMDATE))
 
+## Now the goal is to get just a simple change score for Oct 1 analyses
+
+## Get the IDs used in analysis:
+adni_ids <- readRDS(here::here("R_objects", "041_adni_IDs.RDS"))
+
+# get PET data
+
+amy_pet_02 <- amy_pet_01 %>%
+  dplyr::filter(RID %in% adni_ids$RID)
+
+table(amy_pet_02$VISCODE)
+
+#     bl m108  m12 m120 m132 m144 m156 m168  m24  m36  m48  m60  m72  m84  m96
+# 1  824   34    3   26   33   13   18    4  396   17  257  107  137   77   76
+
+# going to filter for just bl and m24 for ease
+
+amy_pet_02 <- amy_pet_02 %>%
+  dplyr::filter(VISCODE == "bl" | VISCODE == "m24")
+
+# go long to wide
+
+amy_pet_03_wholecerebnorm <- amy_pet_02 %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = SUMMARYSUVR_WHOLECEREBNORM) %>%
+  rename(bl_wholecereb = bl,
+         m24_wholecereb = m24) %>%
+  arrange(RID)
+
+amy_pet_03_composite <- amy_pet_02 %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = SUMMARYSUVR_COMPOSITE_REFNORM) %>%
+  rename(bl_composite = bl,
+         m24_composite = m24)  %>%
+  arrange(RID)
+
+amy_pet_03_examdate <- amy_pet_02 %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = EXAMDATE) %>%
+  rename(bl_examdate = bl,
+         m24_examdate = m24)  %>%
+  arrange(RID)
+
+amy_pet_03_merge1 <- left_join(amy_pet_03_composite, amy_pet_03_wholecerebnorm, by = c("RID"))
+amy_pet_03 <- left_join(amy_pet_03_merge1, amy_pet_03_examdate, by = c("RID"))
+
+#there's problesm with VISCODE which we used to get bl and m24. let's do a quick
+#check to make sure the exam date difference is around 2 years
+
+amy_pet_04 <- amy_pet_03 %>%
+  dplyr::mutate(bl_examdate = lubridate::ymd(bl_examdate),
+                m24_examdate = lubridate::ymd(m24_examdate),
+                diff_examdate = m24_examdate - bl_examdate,
+                diff_examdate = as.numeric(diff_examdate) / 365) #divide by 365 bc we get
+                                                                 #unit of days as default
+
+psych::describe(amy_pet_04$diff_examdate)
+#    vars   n mean   sd median trimmed  mad  min  max range skew kurtosis se
+# X1    1 697 2.03 0.13   2.01    2.02 0.06 1.43 2.63   1.2 1.04     5.21  0
+
+# looks pretty good
+# can save out this data for use down the line
+
+# Now, get cog data at bl and m24
+
+cog_data <- adnimerge_01 %>%
+  select(RID, VISCODE, EXAMDATE, ADAS11, ADAS13) %>%
+  dplyr::filter(RID %in% adni_ids$RID) %>%
+  dplyr::filter(VISCODE == "bl" | VISCODE == "m24")
+
+# check that exam date difference is still around 2
+
+cog_data_examdate <-  cog_data %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = EXAMDATE) %>%
+  rename(bl_examdate = bl,
+         m24_examdate = m24) %>%
+  arrange(RID) %>%
+  dplyr::mutate(bl_examdate = lubridate::ymd(bl_examdate),
+               m24_examdate = lubridate::ymd(m24_examdate),
+               diff_examdate = m24_examdate - bl_examdate,
+               diff_examdate = as.numeric(diff_examdate) / 365) #divide by 365 again for years
+#unit of days as default
+
+psych::describe(cog_data_examdate$diff_examdate)
+#    vars    n mean  sd median trimmed  mad  min  max range skew kurtosis se
+# X1    1 1070 2.03 0.1   2.01    2.02 0.03 1.48 3.28  1.81 4.72    43.53  0
+
+# a little worse. average is still 2 but range is up to 3.3.
+
+cog_data_adas11 <- cog_data %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = ADAS11) %>%
+  rename(bl_adas11 = bl,
+         m24_adas11 = m24) %>%
+  arrange(RID)
+
+cog_data_adas13 <- cog_data %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = ADAS13) %>%
+  rename(bl_adas13 = bl,
+         m24_adas13 = m24) %>%
+  arrange(RID)
+
+cog_data_03 <- left_join(cog_data_adas11, cog_data_adas13, by = c("RID"))
 
 ## Merging Datasets Together
 
@@ -75,3 +174,5 @@ adnimerge_03 <- adnimerge %>%
 haven::write_dta(adnimerge_03, "adni.dta")
 
 saveRDS(adnimerge_03, here::here("R_objects", "020_adnimerge_03.RDS"))
+saveRDS(amy_pet_04, here::here("R_objects", "020_amy_pet_04.RDS"))
+saveRDS(cog_data_03, here::here("R_objects", "020_cog_data_03.RDS"))

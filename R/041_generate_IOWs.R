@@ -663,19 +663,20 @@ plot_data <- rbind(ipw_data, svy_data) %>%
 
 
 
-stdmeandiff_plot <- plot_data %>%
-  ggplot(aes(y = fct_inorder(names), x = stdmeandiff)) +
+stdmeandiff_plot <-
+  ggplot(data = plot_data, aes(y = fct_inorder(names), x = stdmeandiff)) +
   geom_vline(xintercept = 0, color = "black") +
   geom_vline(xintercept = -.25, color = "grey", linetype = "longdash") +
   geom_vline(xintercept = .25, color = "grey", linetype = "longdash") +
-  geom_point(aes(color = IPW)) +
-  scale_color_manual(values = c("snow", "black")) +
-#  scale_shape_manual(values = c(1, 1)) +
   geom_line(aes(group = var), color = "black") +
+  geom_point(aes(color = IPW), fill = "white") +
+#  scale_shape_manual(values = c(1,1)) +
+  scale_color_manual(values = c("snow4", "black")) +
   theme_classic() +
   xlab("Effect size") +
   theme(axis.title.y = element_blank(),
         legend.position = "none")
+
 
 width.is <- 6
 height.is <- 3.7
@@ -689,7 +690,7 @@ ggsave( "stdmeandiffplot.pdf" ,
         height = height.is ,
         units = "in" )
 
-covbalanceplot <- pdftools::pdf_render_page("stdmeandiffplot.pdf", page = 1, dpi = 600)
+covbalanceplot <- pdftools::pdf_render_page("stdmeandiffplot.pdf", page = 1, dpi = 1201)
 
 png::writePNG(covbalanceplot, "covbalanceplot.png")
 
@@ -725,3 +726,7 @@ ggsave( "proboverlap_plot.pdf" ,
 proboverlap <- pdftools::pdf_render_page("proboverlap_plot.pdf", page = 1, dpi = 600)
 
 png::writePNG(proboverlap, "proboverlap.png")
+
+## All looks good - save harmonized data out to have weights
+
+saveRDS(harmonized_main, here::here("R_objects", "041_harmonized_main.RDS"))
