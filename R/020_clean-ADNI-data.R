@@ -33,12 +33,6 @@ scanner_change_ids <- adnimerge_02 %>%
   filter(MRI_STR_CHANGE == 1) %>%
   distinct(RID)
 
-## Obtain State Data
-
-enrolltr_01 <- enrolltr %>%
-  dplyr::select(RID, USERDATE, STATE) %>%
-  dplyr::mutate(RID = as.numeric(RID))
-
 
 ## NEXT NEED TO GET PET ABETA PET
 
@@ -77,21 +71,29 @@ table(amy_pet_02$VISCODE)
 amy_pet_02 <- amy_pet_02 %>%
   dplyr::filter(VISCODE == "bl" | VISCODE == "m24")
 
+# Convert to CLs
+
+amy_pet_03 <- amy_pet_02 %>%
+  dplyr::mutate(CL_CEREBNORM = dplyr::if_else(TRACER == "FBB", 157.15*SUMMARYSUVR_WHOLECEREBNORM - 151.87,
+                                              188.22*SUMMARYSUVR_WHOLECEREBNORM - 189.16),
+                CL_COMPOSITE = dplyr::if_else(TRACER == "FBB", 244.20 * SUMMARYSUVR_COMPOSITE_REFNORM - 170.8,
+                                              300.66 * SUMMARYSUVR_COMPOSITE_REFNORM - 208.84))
+
 # go long to wide
 
-amy_pet_03_wholecerebnorm <- amy_pet_02 %>%
-  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = SUMMARYSUVR_WHOLECEREBNORM) %>%
+amy_pet_03_wholecerebnorm <- amy_pet_03 %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = CL_CEREBNORM) %>%
   rename(bl_wholecereb = bl,
          m24_wholecereb = m24) %>%
   arrange(RID)
 
-amy_pet_03_composite <- amy_pet_02 %>%
-  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = SUMMARYSUVR_COMPOSITE_REFNORM) %>%
+amy_pet_03_composite <- amy_pet_03 %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = CL_COMPOSITE) %>%
   rename(bl_composite = bl,
          m24_composite = m24)  %>%
   arrange(RID)
 
-amy_pet_03_examdate <- amy_pet_02 %>%
+amy_pet_03_examdate <- amy_pet_03 %>%
   pivot_wider(id_cols = RID, names_from = VISCODE, values_from = EXAMDATE) %>%
   rename(bl_examdate = bl,
          m24_examdate = m24)  %>%
@@ -156,11 +158,6 @@ cog_data_adas13 <- cog_data %>%
   arrange(RID)
 
 cog_data_03 <- left_join(cog_data_adas11, cog_data_adas13, by = c("RID"))
-
-## Merging Datasets Together
-
-merge1 <- left_join(adnimerge_02, enrolltr_01, by = c("RID"))
-
 
 ## Creating dataset to do LR to get probability of HRS vs ADNI
 
