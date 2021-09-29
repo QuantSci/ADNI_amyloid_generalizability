@@ -3,23 +3,40 @@ source(here::here('R', '002_folder-paths-and-options.R'))
 
 # import data
 
-harmonized <- readRDS(here::here("R_objects", "041_harmonized_main.RDS"))
+survey <- readRDS(here::here("R_objects", "041_survey_data.RDS"))
+adams <- readRDS(here::here("R_objects", "025_hrs_data_02.RDS"))
 
 # split into ADAMS and ADNI
 
-adams_data <- harmonized %>%
+adams_data <- survey %>%
   dplyr::filter(DATA == "HRS") %>%
-  mutate(AGE_C = AGE - 70)
+  mutate(AGE_C = AGE - 70,
+         ID = as.numeric(ID))
 
-adni_data <- harmonized %>%
+adni_data <- survey %>%
   dplyr::filter(DATA == "ADNI") %>%
   mutate(AGE_C = AGE - 70)
 
+# there has been an issue with the re-scaled weights used in ADAMS. here, I obtain just the ids used in our analyses
+# so I can pull in the original ADAMS sampling weights
+
+adams_ids <- adams_data %>%
+  select(ID)
+
+adams_weights <- adams %>%
+  select(ADAMSSID, AASAMPWT_F) %>%
+  filter(ADAMSSID %in% adams_ids$ID) %>%
+  rename(ID = ADAMSSID) %>%
+  mutate(ID = as.numeric(ID))
+
+adams_data_01 <- left_join(adams_data, adams_weights, by = "ID")
+
+
 # Get MMSE/AGE in ADAMS
 
-adams_svy <- svydesign(data = adams_data,
+adams_svy <- survey::svydesign(data = adams_data_01,
                        ids = ~ID,
-                       weights = ~scaled_weights)
+                       weights = ~AASAMPWT_F)
 
 adams_age_cog <- svyglm(MMSE ~ AGE_C, design = adams_svy)
 
@@ -33,7 +50,7 @@ summary(adni_age_cog_un)
 
 # MMSE/AGE in ADNI (weighted)
 
-adni_svy <- svydesign(data = adni_data,
+adni_svy <- survey::svydesign(data = adni_data,
                       ids = ~ID,
                       weights = ~scaled_weights)
 
@@ -44,7 +61,7 @@ summary(adni_age_cog)
 
 ## Get distribution of APOE4 in ADAMS
 
-svytable(~APOE41Y0N, design = adams_svy)
+survey::svytable(~APOE41Y0N, design = adams_svy)
 
 # APOE41Y0N
 # 0         1

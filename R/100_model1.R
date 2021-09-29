@@ -4,10 +4,10 @@ source(here::here('R', '002_folder-paths-and-options.R'))
 # Import data
 
 pet_data <- readRDS(here::here("R_objects", "020_amy_pet_04.RDS"))
-harmonized <- readRDS(here::here("R_objects", "041_harmonized_main.RDS"))
+survey <- readRDS(here::here("R_objects", "041_survey_data.RDS"))
 cog_data <- readRDS(here::here("R_objects", "020_cog_data_03.RDS"))
 
-adni_data <- harmonized %>%
+adni_data <- survey %>%
   dplyr::filter(DATA == "ADNI") %>%
   rename(RID = ID) %>%
   mutate(RID = as.numeric(RID))
