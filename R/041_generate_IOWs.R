@@ -709,11 +709,10 @@ proboverlap_plot <- ggplot() +
   geom_density(data = adni_predprob_data, aes(x = predprob_main)) +
   geom_density(data = hrs_predprob_data, aes(x = predprob_main), linetype = "dashed") +
   theme_classic() +
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_blank()) +
-  ylab("Density")
+  theme(legend.position = "none") +
+  ylab("Density") +
+  scale_x_continuous(name = "Probability", breaks = c(0, 1))
+
 
 ggsave( "proboverlap_plot.pdf" ,
         plot = proboverlap_plot ,

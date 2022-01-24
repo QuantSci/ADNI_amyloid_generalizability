@@ -25,7 +25,6 @@ adams_ids <- adams_data %>%
 
 adams_weights <- adams %>%
   select(ADAMSSID, AASAMPWT_F) %>%
-  filter(ADAMSSID %in% adams_ids$ID) %>%
   rename(ID = ADAMSSID) %>%
   mutate(ID = as.numeric(ID))
 
@@ -34,9 +33,7 @@ adams_data_01 <- left_join(adams_data, adams_weights, by = "ID")
 
 # Get MMSE/AGE in ADAMS
 
-adams_svy <- survey::svydesign(data = adams_data_01,
-                       ids = ~ID,
-                       weights = ~AASAMPWT_F)
+adams_svy <-  adams_data_01 %>%  srvyr::as_survey_design(ids = ID, weight = AASAMPWT_F)
 
 adams_age_cog <- svyglm(MMSE ~ AGE_C, design = adams_svy)
 
@@ -50,9 +47,7 @@ summary(adni_age_cog_un)
 
 # MMSE/AGE in ADNI (weighted)
 
-adni_svy <- survey::svydesign(data = adni_data,
-                      ids = ~ID,
-                      weights = ~scaled_weights)
+adni_svy <- adni_data %>% srvyr::as_survey_design(ids = ID, weights = scaled_weights)
 
 adni_age_cog <- svyglm(MMSE ~ AGE_C, design = adni_svy)
 
@@ -61,14 +56,10 @@ summary(adni_age_cog)
 
 ## Get distribution of APOE4 in ADAMS
 
-survey::svytable(~APOE41Y0N, design = adams_svy)
 
-# APOE41Y0N
-# 0         1
-# 38582.16 110091.38
-
-(110091.38 / (110091.38 + 38582.16)) * 100
-74
+adams_svy %>%
+  group_by(APOE41Y0N) %>%
+  summarise(prop = survey_mean())
 
 ## get distribution of APOE4 in ADNI (unweighted)
 
@@ -83,7 +74,9 @@ table(adni_data$APOE41Y0N)
 
 ## get distribution of APOE4 in ADNI (weighted)
 
-svytable(~APOE41Y0N, design= adni_svy)
+adni_svy %>%
+  group_by(APOE41Y0N) %>%
+  summarise(prop = survey_mean())
 
 # APOE41Y0N
 # 0        1
@@ -92,3 +85,21 @@ svytable(~APOE41Y0N, design= adni_svy)
 (107.2111 / (277.9765 + 107.2111)) * 100
 
 28
+
+## Using lavaan
+
+age_mmse <- 'MMSE ~ AGE_C'
+
+adams_mmse <- lavaan::sem(model = age_mmse, data = adams_data_01)
+
+adams_mmse_svy <- lavaan.survey::lavaan.survey(adams_mmse, survey.design = adams_svy)
+
+summary(adams_mmse_svy, standardized = T)
+
+adni_mmse <- lavaan::sem(model = age_mmse, data = adni_data, meanstructure = T)
+
+summary(adni_mmse, standardized = T)
+
+adni_mmse_svy <- lavaan.survey::lavaan.survey(adni_mmse, survey.design = adni_svy)
+
+summary(adni_mmse_svy, standardized = T)

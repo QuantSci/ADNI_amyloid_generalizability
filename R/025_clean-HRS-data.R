@@ -30,5 +30,5 @@ hrs_svy_01 <- hrs_data_01 %>%
   srvyr::as_survey_design(ids = ADAMSSID, weight = AASAMPWT_F)
 
 hrs_svy_01 %>%
-  group_by(ADAPOE) %>%
+  group_by(APOE41Y0N) %>%
   summarize(prop = survey_mean())

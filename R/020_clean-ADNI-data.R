@@ -1,5 +1,6 @@
 rm(list = setdiff(ls(), lsf.str())[!(setdiff(ls(), lsf.str()) %in% 'params')])
 source(here::here('R', '002_folder-paths-and-options.R'))
+source(here::here('R', '005_libraries.R'))
 
 ## Variables needed:
 # Abeta, Which PET tracer, scanner strength, cognition (adascog), age, sex, education, race/ethnicity, ApoE, Diagnosis group
@@ -68,12 +69,12 @@ table(amy_pet_02$VISCODE)
 
 # going to filter for just bl and m24 for ease
 
-amy_pet_02 <- amy_pet_02 %>%
+amy_pet_test <- amy_pet_02 %>%
   dplyr::filter(VISCODE == "bl" | VISCODE == "m24")
 
 # Convert to CLs
 
-amy_pet_03 <- amy_pet_02 %>%
+amy_pet_03 <- amy_pet_test %>%
   dplyr::mutate(CL_CEREBNORM = dplyr::if_else(TRACER == "FBB", 157.15*SUMMARYSUVR_WHOLECEREBNORM - 151.87,
                                               188.22*SUMMARYSUVR_WHOLECEREBNORM - 189.16),
                 CL_COMPOSITE = dplyr::if_else(TRACER == "FBB", 244.20 * SUMMARYSUVR_COMPOSITE_REFNORM - 170.8,
@@ -159,6 +160,28 @@ cog_data_adas13 <- cog_data %>%
 
 cog_data_03 <- left_join(cog_data_adas11, cog_data_adas13, by = c("RID"))
 
+## Get ADNI_EF and ADNI_MEM data from uwnpsychsum
+
+uwnpsychsum_01 <- uwnpsychsum %>%
+  select(RID, ORIGPROT, VISCODE, EXAMDATE, ADNI_MEM, ADNI_EF) %>%
+  dplyr::filter(RID %in% adni_ids$RID) %>%
+  dplyr::filter(VISCODE == "bl" | VISCODE == "m24") %>%
+  dplyr::select(-EXAMDATE, -ORIGPROT)
+
+uwnpsychsum_adni_mem <- uwnpsychsum_01 %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = ADNI_MEM) %>%
+  rename(bl_adni_mem = bl,
+         m24_adni_mem = m24) %>%
+  arrange(RID)
+
+uwnpsychsum_adni_ef <- uwnpsychsum_01 %>%
+  pivot_wider(id_cols = RID, names_from = VISCODE, values_from = ADNI_EF) %>%
+  rename(bl_adni_ef = bl,
+         m24_adni_ef = m24) %>%
+  arrange(RID)
+
+uw_cog_data <- left_join(uwnpsychsum_adni_mem, uwnpsychsum_adni_ef, by = "RID")
+
 ## Creating dataset to do LR to get probability of HRS vs ADNI
 
 adnimerge_03 <- adnimerge %>%
@@ -173,3 +196,4 @@ haven::write_dta(adnimerge_03, "adni.dta")
 saveRDS(adnimerge_03, here::here("R_objects", "020_adnimerge_03.RDS"))
 saveRDS(amy_pet_04, here::here("R_objects", "020_amy_pet_04.RDS"))
 saveRDS(cog_data_03, here::here("R_objects", "020_cog_data_03.RDS"))
+saveRDS(uw_cog_data, here::here("R_objects", "020_uw_cog_data.RDS"))

@@ -75,6 +75,98 @@ weights::wtd.cor(delta_data$delta_composite, delta_data$delta_adas11, weight = d
 
 weights::wtd.cor(delta_data$delta_composite, delta_data$delta_adas13, weight = delta_data$scaled_weights)
 
+# Get fully standardized regression coefficients
+
+#Amyloid at baseline & adas13 at baseline, no weights
+
+m1 <- lm(bl_adas13 ~ bl_wholecereb, data = delta_data)
+summary(m1)
+
+#Amyloid at baseline and adas 13 change over 24 months, no weights
+
+m2 <- lm(delta_adas13 ~ bl_wholecereb, data = delta_data)
+summary(m2)
+
+# Amyloid change over 24 months and adas 13 at baseline, no weights
+
+m3 <- lm(bl_adas13 ~ delta_composite, data = delta_data)
+summary(m3)
+
+#Amyloid change over 24 months and adas 13 change of 24 months, no weights
+
+m4 <- lm(delta_adas13 ~ delta_composite, data = delta_data)
+summary(m4)
+
+# amyloid at baseline and adas 13 at baseline, weights
+delta_svy <- survey::svydesign(data = delta_data,
+                               ids = ~RID,
+                               weights = ~scaled_weights)
+
+wm1 <- svyglm(bl_adas13 ~ bl_wholecereb, design = delta_svy)
+summary(wm1)
+
+#Amyloid at baseline and adas 13 change over 24 months, no weights
+
+wm2 <- svyglm(delta_adas13 ~ bl_wholecereb, design = delta_svy)
+summary(wm2)
+
+# Amyloid change over 24 months and adas 13 at baseline, no weights
+
+wm3 <- svyglm(bl_adas13 ~ delta_composite, design = delta_svy)
+summary(wm3)
+
+#Amyloid change over 24 months and adas 13 change of 24 months, no weights
+
+wm4 <- svyglm(delta_adas13 ~ delta_composite, design = delta_svy)
+summary(wm4)
+
+# Amyloid at baseline predicting change in amyloid, no weights
+
+m5 <- lm(delta_composite ~ bl_composite, data = delta_data)
+summary(m5)
+
+# Amyloid at baseline predicting change in amyloid, weights
+
+wm5 <- svyglm(delta_composite ~ bl_composite, design = delta_svy)
+summary(wm5)
+
+# Cognition at baseline predicting change in amyloid, no weights
+
+m6 <- lm(delta_composite ~ bl_adas13, data = delta_data)
+summary(m6)
+
+# Cognition at baseline predicting change in amyloid, weights
+
+wm6 <- svyglm(delta_composite ~ bl_adas13, design = delta_svy)
+summary(wm6)
+
+# Cognition at baseline predicting change in cognition, no weights
+
+m7 <- lm(delta_adas13 ~ bl_adas13, data = delta_data)
+summary(m7)
+
+# Cognition at baseline predicting change in cognition, weights
+
+wm7 <- svyglm(delta_adas13 ~ bl_adas13, design = delta_svy)
+summary(wm7)
+
+## Cross-lagged panel model
+
+clpm_model <- 'delta_adas13 ~ bl_adas13 + bl_composite
+               delta_composite ~ bl_adas13 + bl_composite
+               delta_adas13 ~ delta_composite
+               bl_adas13 ~ bl_composite'
+
+clpm1 <- lavaan::sem(model = clpm_model, data = delta_data)
+
+summary(clpm1, fit.measures = T, standardized = T)
+
+clpm_w1 <- lavaan.survey::lavaan.survey(clpm1, survey.design = delta_svy)
+
+summary(clpm_w1, fit.measures = T, standardized = T)
+
+lavaan::standardizedSolution(clpm_w1)
+
 # Look in just MCI group
 
 mci_data <- delta_data %>%
