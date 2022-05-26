@@ -669,9 +669,9 @@ stdmeandiff_plot <-
   geom_vline(xintercept = -.25, color = "grey", linetype = "longdash") +
   geom_vline(xintercept = .25, color = "grey", linetype = "longdash") +
   geom_line(aes(group = var), color = "black") +
-  geom_point(aes(color = IPW), fill = "white") +
-#  scale_shape_manual(values = c(1,1)) +
-  scale_color_manual(values = c("snow4", "black")) +
+  geom_point(aes(shape = IPW), fill = "white") +
+  scale_shape_manual(values = c(21,16)) +
+  # scale_color_manual(values = c("snow4", "black")) +
   theme_classic() +
   xlab("Effect size") +
   theme(axis.title.y = element_blank(),
@@ -709,11 +709,10 @@ proboverlap_plot <- ggplot() +
   geom_density(data = adni_predprob_data, aes(x = predprob_main)) +
   geom_density(data = hrs_predprob_data, aes(x = predprob_main), linetype = "dashed") +
   theme_classic() +
-  theme(legend.position = "none",
-        axis.title.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_blank()) +
-  ylab("Density")
+  theme(legend.position = "none") +
+  ylab("Density") +
+  scale_x_continuous(name = "Probability", breaks = c(0, 1))
+
 
 ggsave( "proboverlap_plot.pdf" ,
         plot = proboverlap_plot ,
@@ -729,4 +728,4 @@ png::writePNG(proboverlap, "proboverlap.png")
 
 ## All looks good - save harmonized data out to have weights
 
-saveRDS(harmonized_main, here::here("R_objects", "041_harmonized_main.RDS"))
+saveRDS(survey_data, here::here("R_objects", "041_survey_data.RDS"))
