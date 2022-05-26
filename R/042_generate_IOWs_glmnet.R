@@ -698,3 +698,5 @@ proboverlap_plot <- ggplot() +
   theme(legend.position = "none") +
   ylab("Density") +
   scale_x_continuous(name = "Probability", breaks = c(0, 1))
+
+saveRDS(survey_data, here::here("R_objects", "042_survey_data.RDS"))
