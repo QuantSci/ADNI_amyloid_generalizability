@@ -414,7 +414,11 @@ data %>%
 
 ### ADNI MEM FIGURES
 
-engage_adnimem_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = engage_amyloidbaseline_to_adnimembaseline,
+blamyloidblcog <- paste0("Est = ", engage_amyloidbaseline_to_adnimembaseline, "\nse = ",
+                         .5, "\np.value = ", .1)
+
+engage_adnimem_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = blamyloidblcog,
+                                                # c(engage_amyloidbaseline_to_adnimembaseline, .5, .001),
                                               m24_amyloid_to_m24_cog    = engage_amyloidm24_to_adnimemm24,
                                               bl_amyloid_to_m24_amyloid = engage_amyloidbaseline_to_amyloidm24,
                                               bl_cog_to_m24_cog         = engage_adnimembaseline_to_adnimemm24,

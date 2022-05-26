@@ -29,69 +29,69 @@ unweighteddata <- left_join(merge2, uw_cog_data, by = "RID") %>%
          AGE, MMSE, APOE41Y0N, DX) %>%
   mutate(scaled_weights = as.vector(scaled_weights))
 
-unweighted_imp <- mice::mice(data = unweighteddata,
-                             m = 1,
-                             seed = 8675309,
-                             pred = mice::quickpred(unweighteddata,
-                                                    inc = c("m24_composite", "m24_wholecereb", "m24_adni_mem", "m24_adni_ef",
-                                                            "m24_adas13"),
-                                                    # this line only calls for imputation on vars with missing data
-                                                    exc = c("RID", "scaled_weights")))
-
-impdata <- complete(unweighted_imp, 1)
-
-plot(impdata)
-
-## Check diagnostic plots to make sure the means are converging over multiple imputations
-
-svy_design <- survey::svydesign(data = impdata,
-                                ids = ~RID,
-                                weights = ~scaled_weights)
-
-## Make subsets based on bins
-
-svy_subset_engage <- subset(svy_design, bl_wholecereb > 25)
-svy_subset_donanemab <- subset(svy_design, bl_wholecereb > 36)
-svy_subset_shouldbe <- subset(svy_design, between(bl_wholecereb, 15, 50))
+# svy_subset_engage <- subset(svy_design, bl_wholecereb > 25)
+# svy_subset_donanemab <- subset(svy_design, bl_wholecereb > 36)
+# svy_subset_shouldbe <- subset(svy_design, between(bl_wholecereb, 15, 50))
 
 # Create CLPM code for different cognition outcomes
 
 clpm_model_adnimem <- 'm24_adni_mem ~ bl_adni_mem +  bl_composite
-                       m24_composite ~ 0.144*bl_adni_mem + bl_composite
+                       m24_composite ~ 1.35*bl_adni_mem + bl_composite
                        m24_adni_mem ~ m24_composite
                        bl_adni_mem ~ bl_composite'
 
 clpm_model_adnief <- 'm24_adni_ef ~ bl_adni_ef + bl_composite
-                      m24_composite ~ 0.065*bl_adni_ef + bl_composite
+                      m24_composite ~ .053*bl_adni_ef + bl_composite
                       m24_adni_ef ~ m24_composite
                       bl_adni_ef ~ bl_composite'
 
 clpm_model_adas13 <- 'm24_adas13 ~ bl_adas13 + bl_composite
-                      m24_composite ~ -0.055*bl_adas13 + bl_composite
+                      m24_composite ~ -.197*bl_adas13 + bl_composite
                       m24_adas13 ~ m24_composite
                       bl_adas13 ~ bl_composite'
 
 ### Remember each has one n.s. pathway fixed to unstandardized estimate for model identification
 
-# Run unweighted CLPMs
+# Run CLPMs -- overall sample
 
-clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem, data = impdata)
+clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
+                            data = unweighteddata,
+                            missing = "ml",
+                            estimator = "MLR",
+                            sampling.weights = "scaled_weights",
+                            fixed.x = FALSE)
 
 summary(clpm_adnimem, fit.measures = T, standardized = T)
 
-clpm_adnief <- lavaan::sem(model = clpm_model_adnief, data = impdata)
+clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
+                           data = unweighteddata,
+                           missing = "ml",
+                           estimator = "MLR",
+                           sampling.weights = "scaled_weights",
+                           fixed.x = FALSE)
 
 summary(clpm_adnief, fit.measures = T, standardized = T)
 
-clpm_adas13 <- lavaan::sem(model = clpm_model_adas13, data = impdata)
+clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                           data = unweighteddata,
+                           missing = "ml",
+                           estimator = "MLR",
+                           sampling.weights = "scaled_weights",
+                           fixed.x = FALSE)
 
 summary(clpm_adas13, fit.measures = T, standardized = T)
 
-# Run weighted CLPMs
-
 # ENGAGE CRITERIA
 
-engage_clpm_adnimem <- lavaan.survey::lavaan.survey(clpm_adnimem, survey.design = svy_subset_engage)
+engage_subset <- unweighteddata %>%
+  filter(bl_wholecereb > 25)
+
+engage_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
+                                   data = engage_subset,
+                                   missing = "ml",
+                                   estimator = "MLR",
+                                   sampling.weights = "scaled_weights",
+                                   fixed.x = FALSE)
 
 summary(engage_clpm_adnimem, fit.measures = T, standardized = T)
 
