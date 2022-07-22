@@ -4,55 +4,68 @@ source(here::here('R', '005_libraries.R'))
 
 # Import data
 
-engage_adnimem_results <-    readRDS(here::here("R_objects", "210_engage_adnimem.RDS"))
-engage_adnief_results <-     readRDS(here::here("R_objects", "210_engage_adnief.RDS"))
-engage_adas13_results <-   readRDS(here::here("R_objects", "210_engage_adas13.RDS"))
-donanemab_adnimem_results <- readRDS(here::here("R_objects", "210_donanemab_adnimem.RDS"))
-donanemab_adnief_results <- readRDS(here::here("R_objects", "210_donanemab_adnief.RDS"))
-donanemab_adas13_results <-  readRDS(here::here("R_objects", "210_donanemab_adas13.RDS"))
-shouldbe_adnimem_results <-  readRDS(here::here("R_objects", "210_shouldbe_adnimem.RDS"))
-shouldbe_adnief_results <-   readRDS(here::here("R_objects", "210_shouldbe_adnief.RDS"))
-shouldbe_adas13_results <-   readRDS(here::here("R_objects", "210_shouldbe_adas13.RDS"))
+engage_adnimem_results <-    readRDS(here::here("R_objects", "210_engage_adnimem.RDS"))    %>% as.data.frame()
+engage_adnief_results <-     readRDS(here::here("R_objects", "210_engage_adnief.RDS"))     %>% as.data.frame()
+engage_adas13_results <-   readRDS(here::here("R_objects", "210_engage_adas13.RDS"))       %>% as.data.frame()
+donanemab_adnimem_results <- readRDS(here::here("R_objects", "210_donanemab_adnimem.RDS")) %>% as.data.frame()
+donanemab_adnief_results <- readRDS(here::here("R_objects", "210_donanemab_adnief.RDS"))   %>% as.data.frame()
+donanemab_adas13_results <-  readRDS(here::here("R_objects", "210_donanemab_adas13.RDS"))  %>% as.data.frame()
+shouldbe_adnimem_results <-  readRDS(here::here("R_objects", "210_shouldbe_adnimem.RDS"))  %>% as.data.frame()
+shouldbe_adnief_results <-   readRDS(here::here("R_objects", "210_shouldbe_adnief.RDS"))   %>% as.data.frame()
+shouldbe_adas13_results <-   readRDS(here::here("R_objects", "210_shouldbe_adas13.RDS"))   %>% as.data.frame()
+
+names(engage_adnimem_results) <- sub(".*\\.", "", names(engage_adnimem_results))
+names(engage_adnief_results) <- sub(".*\\.", "", names(engage_adnief_results))
+names(engage_adas13_results) <- sub(".*\\.", "", names(engage_adas13_results))
+
+names(donanemab_adnimem_results) <- sub(".*\\.", "", names(donanemab_adnimem_results))
+names(donanemab_adnief_results) <- sub(".*\\.", "", names(donanemab_adnief_results))
+names(donanemab_adas13_results) <- sub(".*\\.", "", names(donanemab_adas13_results))
+
+names(shouldbe_adnimem_results) <- sub(".*\\.", "", names(shouldbe_adnimem_results))
+names(shouldbe_adnief_results) <- sub(".*\\.", "", names(shouldbe_adnief_results))
+names(shouldbe_adas13_results) <- sub(".*\\.", "", names(shouldbe_adas13_results))
+
 
 # Pull results
 
-# beta
+# beta (standardized estimate)
 
 ## ENGAGE - ADNIMEM
 
 engage_adnimembaseline_to_adnimemm24.beta <- engage_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "bl_adni_mem") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_amyloidbaseline_to_adnimem24.beta <- engage_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_adnimembaseline_to_amyloidm24.beta <- engage_adnimem_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adni_mem") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_amyloidbaseline_to_amyloidm24.beta <- engage_adnimem_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 engage_amyloidm24_to_adnimemm24.beta <- engage_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 engage_amyloidbaseline_to_adnimembaseline.beta <- engage_adnimem_results %>%
   filter(lhs == "bl_adni_mem", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -60,37 +73,37 @@ engage_amyloidbaseline_to_adnimembaseline.beta <- engage_adnimem_results %>%
 
 donanemab_adnimembaseline_to_adnimemm24.beta <- donanemab_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "bl_adni_mem") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_amyloidbaseline_to_adnimem24.beta <- donanemab_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_adnimembaseline_to_amyloidm24.beta <- donanemab_adnimem_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adni_mem") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_amyloidbaseline_to_amyloidm24.beta <- donanemab_adnimem_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 donanemab_amyloidm24_to_adnimemm24.beta <- donanemab_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 donanemab_amyloidbaseline_to_adnimembaseline.beta <- donanemab_adnimem_results %>%
   filter(lhs == "bl_adni_mem", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -98,37 +111,37 @@ donanemab_amyloidbaseline_to_adnimembaseline.beta <- donanemab_adnimem_results %
 
 shouldbe_adnimembaseline_to_adnimemm24.beta <- shouldbe_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "bl_adni_mem") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_adnimem24.beta <- shouldbe_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_adnimembaseline_to_amyloidm24.beta <- shouldbe_adnimem_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adni_mem") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_amyloidm24.beta <- shouldbe_adnimem_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 shouldbe_amyloidm24_to_adnimemm24.beta <- shouldbe_adnimem_results %>%
   filter(lhs == "m24_adni_mem", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_adnimembaseline.beta <- shouldbe_adnimem_results %>%
   filter(lhs == "bl_adni_mem", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -136,37 +149,37 @@ shouldbe_amyloidbaseline_to_adnimembaseline.beta <- shouldbe_adnimem_results %>%
 
 engage_adniefbaseline_to_adniefm24.beta <- engage_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "bl_adni_ef") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_amyloidbaseline_to_adnief24.beta <- engage_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_adniefbaseline_to_amyloidm24.beta <- engage_adnief_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adni_ef") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_amyloidbaseline_to_amyloidm24.beta <- engage_adnief_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 engage_amyloidm24_to_adniefm24.beta <- engage_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 engage_amyloidbaseline_to_adniefbaseline.beta <- engage_adnief_results %>%
   filter(lhs == "bl_adni_ef", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -174,37 +187,37 @@ engage_amyloidbaseline_to_adniefbaseline.beta <- engage_adnief_results %>%
 
 donanemab_adniefbaseline_to_adniefm24.beta <- donanemab_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "bl_adni_ef") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_amyloidbaseline_to_adnief24.beta <- donanemab_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_adniefbaseline_to_amyloidm24.beta <- donanemab_adnief_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adni_ef") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_amyloidbaseline_to_amyloidm24.beta <- donanemab_adnief_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 donanemab_amyloidm24_to_adniefm24.beta <- donanemab_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 donanemab_amyloidbaseline_to_adniefbaseline.beta <- donanemab_adnief_results %>%
   filter(lhs == "bl_adni_ef", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -212,37 +225,37 @@ donanemab_amyloidbaseline_to_adniefbaseline.beta <- donanemab_adnief_results %>%
 
 shouldbe_adniefbaseline_to_adniefm24.beta <- shouldbe_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "bl_adni_ef") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_adnief24.beta <- shouldbe_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_adniefbaseline_to_amyloidm24.beta <- shouldbe_adnief_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adni_ef") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_amyloidm24.beta <- shouldbe_adnief_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 shouldbe_amyloidm24_to_adniefm24.beta <- shouldbe_adnief_results %>%
   filter(lhs == "m24_adni_ef", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_adniefbaseline.beta <- shouldbe_adnief_results %>%
   filter(lhs == "bl_adni_ef", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -250,37 +263,37 @@ shouldbe_amyloidbaseline_to_adniefbaseline.beta <- shouldbe_adnief_results %>%
 
 engage_adas13baseline_to_adas13m24.beta <- engage_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "bl_adas13") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_amyloidbaseline_to_adas1324.beta <- engage_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_adas13baseline_to_amyloidm24.beta <- engage_adas13_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adas13") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 engage_amyloidbaseline_to_amyloidm24.beta <- engage_adas13_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 engage_amyloidm24_to_adas13m24.beta <- engage_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 engage_amyloidbaseline_to_adas13baseline.beta <- engage_adas13_results %>%
   filter(lhs == "bl_adas13", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -288,37 +301,37 @@ engage_amyloidbaseline_to_adas13baseline.beta <- engage_adas13_results %>%
 
 donanemab_adas13baseline_to_adas13m24.beta <- donanemab_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "bl_adas13") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_amyloidbaseline_to_adas1324.beta <- donanemab_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_adas13baseline_to_amyloidm24.beta <- donanemab_adas13_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adas13") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 donanemab_amyloidbaseline_to_amyloidm24.beta <- donanemab_adas13_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 donanemab_amyloidm24_to_adas13m24.beta <- donanemab_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 donanemab_amyloidbaseline_to_adas13baseline.beta <- donanemab_adas13_results %>%
   filter(lhs == "bl_adas13", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
@@ -326,39 +339,384 @@ donanemab_amyloidbaseline_to_adas13baseline.beta <- donanemab_adas13_results %>%
 
 shouldbe_adas13baseline_to_adas13m24.beta <- shouldbe_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "bl_adas13") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_adas1324.beta <- shouldbe_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_adas13baseline_to_amyloidm24.beta <- shouldbe_adas13_results %>%
   filter(lhs == "m24_composite", rhs == "bl_adas13") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull() %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_amyloidm24.beta <- shouldbe_adas13_results %>%
   filter(lhs == "m24_composite", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 shouldbe_amyloidm24_to_adas13m24.beta <- shouldbe_adas13_results %>%
   filter(lhs == "m24_adas13", rhs == "m24_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
 
 shouldbe_amyloidbaseline_to_adas13baseline.beta <- shouldbe_adas13_results %>%
   filter(lhs == "bl_adas13", rhs == "bl_composite") %>%
-  select(est.std) %>%
+  select(all) %>%
   pull %>%
   round(2)
+
+## b (unstandardized estimate)
+
+## ENGAGE - ADNIMEM
+
+engage_adnimembaseline_to_adnimemm24.b <- engage_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "bl_adni_mem") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_amyloidbaseline_to_adnimem24.b <- engage_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_adnimembaseline_to_amyloidm24.b <- engage_adnimem_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adni_mem") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_amyloidbaseline_to_amyloidm24.b <- engage_adnimem_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+engage_amyloidm24_to_adnimemm24.b <- engage_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+engage_amyloidbaseline_to_adnimembaseline.b <- engage_adnimem_results %>%
+  filter(lhs == "bl_adni_mem", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## DONANEMAB - ADNIMEM
+
+donanemab_adnimembaseline_to_adnimemm24.b <- donanemab_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "bl_adni_mem") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_adnimem24.b <- donanemab_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_adnimembaseline_to_amyloidm24.b <- donanemab_adnimem_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adni_mem") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_amyloidm24.b <- donanemab_adnimem_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+donanemab_amyloidm24_to_adnimemm24.b <- donanemab_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_adnimembaseline.b <- donanemab_adnimem_results %>%
+  filter(lhs == "bl_adni_mem", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## shouldbe - ADNIMEM
+
+shouldbe_adnimembaseline_to_adnimemm24.b <- shouldbe_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "bl_adni_mem") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_adnimem24.b <- shouldbe_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_adnimembaseline_to_amyloidm24.b <- shouldbe_adnimem_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adni_mem") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_amyloidm24.b <- shouldbe_adnimem_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+shouldbe_amyloidm24_to_adnimemm24.b <- shouldbe_adnimem_results %>%
+  filter(lhs == "m24_adni_mem", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_adnimembaseline.b <- shouldbe_adnimem_results %>%
+  filter(lhs == "bl_adni_mem", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## ENGAGE - adnief
+
+engage_adniefbaseline_to_adniefm24.b <- engage_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "bl_adni_ef") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_amyloidbaseline_to_adnief24.b <- engage_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_adniefbaseline_to_amyloidm24.b <- engage_adnief_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adni_ef") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_amyloidbaseline_to_amyloidm24.b <- engage_adnief_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+engage_amyloidm24_to_adniefm24.b <- engage_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+engage_amyloidbaseline_to_adniefbaseline.b <- engage_adnief_results %>%
+  filter(lhs == "bl_adni_ef", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## DONANEMAB - adnief
+
+donanemab_adniefbaseline_to_adniefm24.b <- donanemab_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "bl_adni_ef") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_adnief24.b <- donanemab_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_adniefbaseline_to_amyloidm24.b <- donanemab_adnief_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adni_ef") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_amyloidm24.b <- donanemab_adnief_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+donanemab_amyloidm24_to_adniefm24.b <- donanemab_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_adniefbaseline.b <- donanemab_adnief_results %>%
+  filter(lhs == "bl_adni_ef", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## shouldbe - adnief
+
+shouldbe_adniefbaseline_to_adniefm24.b <- shouldbe_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "bl_adni_ef") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_adnief24.b <- shouldbe_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_adniefbaseline_to_amyloidm24.b <- shouldbe_adnief_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adni_ef") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_amyloidm24.b <- shouldbe_adnief_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+shouldbe_amyloidm24_to_adniefm24.b <- shouldbe_adnief_results %>%
+  filter(lhs == "m24_adni_ef", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_adniefbaseline.b <- shouldbe_adnief_results %>%
+  filter(lhs == "bl_adni_ef", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## ENGAGE - adas13
+
+engage_adas13baseline_to_adas13m24.b <- engage_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "bl_adas13") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_amyloidbaseline_to_adas1324.b <- engage_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_adas13baseline_to_amyloidm24.b <- engage_adas13_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adas13") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+engage_amyloidbaseline_to_amyloidm24.b <- engage_adas13_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+engage_amyloidm24_to_adas13m24.b <- engage_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+engage_amyloidbaseline_to_adas13baseline.b <- engage_adas13_results %>%
+  filter(lhs == "bl_adas13", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## DONANEMAB - adas13
+
+donanemab_adas13baseline_to_adas13m24.b <- donanemab_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "bl_adas13") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_adas1324.b <- donanemab_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_adas13baseline_to_amyloidm24.b <- donanemab_adas13_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adas13") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_amyloidm24.b <- donanemab_adas13_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+donanemab_amyloidm24_to_adas13m24.b <- donanemab_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+donanemab_amyloidbaseline_to_adas13baseline.b <- donanemab_adas13_results %>%
+  filter(lhs == "bl_adas13", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+## shouldbe - adas13
+
+shouldbe_adas13baseline_to_adas13m24.b <- shouldbe_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "bl_adas13") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_adas1324.b <- shouldbe_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_adas13baseline_to_amyloidm24.b <- shouldbe_adas13_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_adas13") %>%
+  select(est) %>%
+  pull() %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_amyloidm24.b <- shouldbe_adas13_results %>%
+  filter(lhs == "m24_composite", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+shouldbe_amyloidm24_to_adas13m24.b <- shouldbe_adas13_results %>%
+  filter(lhs == "m24_adas13", rhs == "m24_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
+shouldbe_amyloidbaseline_to_adas13baseline.b <- shouldbe_adas13_results %>%
+  filter(lhs == "bl_adas13", rhs == "bl_composite") %>%
+  select(est) %>%
+  pull %>%
+  round(2)
+
 
 # SE
 
@@ -1136,23 +1494,30 @@ data %>%
 
 ## Get estimates
 
-engage_adnimem_bl_amyloid_bl_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adnimembaseline.beta, "\nSE = ",
-                         engage_amyloidbaseline_to_adnimembaseline.se, "\np ", engage_amyloidbaseline_to_adnimembaseline.pvalue)
+engage_adnimem_bl_amyloid_bl_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adnimembaseline.beta)
+                         #                   , "\nSE = ",
+                         # engage_amyloidbaseline_to_adnimembaseline.se, "\np ", engage_amyloidbaseline_to_adnimembaseline.pvalue)
 
-engage_adnimem_m24_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidm24_to_adnimemm24.beta, "\nSE = ",
-                                             engage_amyloidm24_to_adnimemm24.se, "\np = ", engage_amyloidm24_to_adnimemm24.pvalue)
+engage_adnimem_m24_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidm24_to_adnimemm24.beta)
+# , "\nSE = ",
+#                                              engage_amyloidm24_to_adnimemm24.se, "\np = ", engage_amyloidm24_to_adnimemm24.pvalue)
 
-engage_adnimem_bl_amyloid_m24_amyloid <- paste0("Est. = ", engage_amyloidbaseline_to_amyloidm24.beta, "\nSE = ",
-                                                engage_amyloidbaseline_to_amyloidm24.se, "\np ", engage_amyloidbaseline_to_amyloidm24.pvalue)
+engage_adnimem_bl_amyloid_m24_amyloid <- paste0("Est. = ", engage_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                 engage_amyloidbaseline_to_amyloidm24.se, "\np ", engage_amyloidbaseline_to_amyloidm24.pvalue)
 
-engage_adnimem_bl_cog_m24_cog <- paste0("Est. = ", engage_adnimembaseline_to_adnimemm24.beta, "\nSE = ",
-                                        engage_adnimembaseline_to_adnimemm24.se, "\np ", engage_adnimembaseline_to_adnimemm24.pvalue)
+engage_adnimem_bl_cog_m24_cog <- paste0("Est. = ", engage_adnimembaseline_to_adnimemm24.beta)
+# , "\nSE = ",
+#                                         engage_adnimembaseline_to_adnimemm24.se, "\np ", engage_adnimembaseline_to_adnimemm24.pvalue)
 
-engage_adnimem_bl_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adnimem24.beta, "\nSE = ",
-                                            engage_amyloidbaseline_to_adnimem24.se, "\np = ", engage_amyloidbaseline_to_adnimem24.pvalue)
+engage_adnimem_bl_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adnimem24.beta)
+# , "\nSE = ",
+#                                             engage_amyloidbaseline_to_adnimem24.se, "\np = ", engage_amyloidbaseline_to_adnimem24.pvalue)
 
-engage_adnimem_bl_cog_m24_amyloid <- paste0("Est. = ", engage_adnimembaseline_to_amyloidm24.beta, "\nSE = ",
-                                            engage_adnimembaseline_to_amyloidm24.se, "\np ", engage_adnimembaseline_to_amyloidm24.pvalue)
+engage_adnimem_bl_cog_m24_amyloid <- paste0("Est. = ", engage_adnimembaseline_to_amyloidm24.beta)
+# , "\nFixed")
+                                            # , "\nSE = ",
+                                            # engage_adnimembaseline_to_amyloidm24.se, "\np ", engage_adnimembaseline_to_amyloidm24.pvalue)
 
 
 engage_adnimem_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = engage_adnimem_bl_amyloid_bl_cog,
@@ -1163,23 +1528,30 @@ engage_adnimem_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = engage
                                               bl_cog_to_m24_amyloid     = engage_adnimem_bl_cog_m24_amyloid)
 engage_adnimem_figure
 
-donanemab_adnimem_bl_amyloid_bl_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adnimembaseline.beta, "\nSE = ",
-                                           donanemab_amyloidbaseline_to_adnimembaseline.se, "\np ", donanemab_amyloidbaseline_to_adnimembaseline.pvalue)
+donanemab_adnimem_bl_amyloid_bl_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adnimembaseline.beta)
+                                           #    , "\nSE = ",
+                                           # donanemab_amyloidbaseline_to_adnimembaseline.se, "\np ", donanemab_amyloidbaseline_to_adnimembaseline.pvalue)
 
-donanemab_adnimem_m24_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidm24_to_adnimemm24.beta, "\nSE = ",
-                                             donanemab_amyloidm24_to_adnimemm24.se, "\np = ", donanemab_amyloidm24_to_adnimemm24.pvalue)
+donanemab_adnimem_m24_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidm24_to_adnimemm24.beta)
+# , "\nSE = ",
+#                                              donanemab_amyloidm24_to_adnimemm24.se, "\np = ", donanemab_amyloidm24_to_adnimemm24.pvalue)
 
-donanemab_adnimem_bl_amyloid_m24_amyloid <- paste0("Est. = ", donanemab_amyloidbaseline_to_amyloidm24.beta, "\nSE = ",
-                                                donanemab_amyloidbaseline_to_amyloidm24.se, "\np ", donanemab_amyloidbaseline_to_amyloidm24.pvalue)
+donanemab_adnimem_bl_amyloid_m24_amyloid <- paste0("Est. = ", donanemab_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                 donanemab_amyloidbaseline_to_amyloidm24.se, "\np ", donanemab_amyloidbaseline_to_amyloidm24.pvalue)
 
-donanemab_adnimem_bl_cog_m24_cog <- paste0("Est. = ", donanemab_adnimembaseline_to_adnimemm24.beta, "\nSE = ",
-                                        donanemab_adnimembaseline_to_adnimemm24.se, "\np ", donanemab_adnimembaseline_to_adnimemm24.pvalue)
+donanemab_adnimem_bl_cog_m24_cog <- paste0("Est. = ", donanemab_adnimembaseline_to_adnimemm24.beta)
+# , "\nSE = ",
+#                                         donanemab_adnimembaseline_to_adnimemm24.se, "\np ", donanemab_adnimembaseline_to_adnimemm24.pvalue)
 
-donanemab_adnimem_bl_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adnimem24.beta, "\nSE = ",
-                                            donanemab_amyloidbaseline_to_adnimem24.se, "\np = ", donanemab_amyloidbaseline_to_adnimem24.pvalue)
+donanemab_adnimem_bl_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adnimem24.beta)
+# , "\nSE = ",
+#                                             donanemab_amyloidbaseline_to_adnimem24.se, "\np = ", donanemab_amyloidbaseline_to_adnimem24.pvalue)
 
-donanemab_adnimem_bl_cog_m24_amyloid <- paste0("Est. = ", donanemab_adnimembaseline_to_amyloidm24.beta, "\nSE = ",
-                                            donanemab_adnimembaseline_to_amyloidm24.se, "\np ", donanemab_adnimembaseline_to_amyloidm24.pvalue)
+donanemab_adnimem_bl_cog_m24_amyloid <- paste0("Est. = ", donanemab_adnimembaseline_to_amyloidm24.beta)
+# , "\n Fixed")
+# \nSE = ",
+#                                             donanemab_adnimembaseline_to_amyloidm24.se, "\np ", donanemab_adnimembaseline_to_amyloidm24.pvalue)
 
 
 donanemab_adnimem_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = donanemab_adnimem_bl_amyloid_bl_cog,
@@ -1190,23 +1562,30 @@ donanemab_adnimem_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = don
                                               bl_cog_to_m24_amyloid     = donanemab_adnimem_bl_cog_m24_amyloid)
 donanemab_adnimem_figure
 
-shouldbe_adnimem_bl_amyloid_bl_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adnimembaseline.beta, "\nSE = ",
-                                           shouldbe_amyloidbaseline_to_adnimembaseline.se, "\np = ", shouldbe_amyloidbaseline_to_adnimembaseline.pvalue)
+shouldbe_adnimem_bl_amyloid_bl_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adnimembaseline.beta)
+# , "\nSE = ",
+#                                            shouldbe_amyloidbaseline_to_adnimembaseline.se, "\np = ", shouldbe_amyloidbaseline_to_adnimembaseline.pvalue)
 
-shouldbe_adnimem_m24_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidm24_to_adnimemm24.beta, "\nSE = ",
-                                             shouldbe_amyloidm24_to_adnimemm24.se, "\np = ", shouldbe_amyloidm24_to_adnimemm24.pvalue)
+shouldbe_adnimem_m24_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidm24_to_adnimemm24.beta)
+# , "\nSE = ",
+#                                              shouldbe_amyloidm24_to_adnimemm24.se, "\np = ", shouldbe_amyloidm24_to_adnimemm24.pvalue)
 
-shouldbe_adnimem_bl_amyloid_m24_amyloid <- paste0("Est. = ", shouldbe_amyloidbaseline_to_amyloidm24.beta, "\nSE = ",
-                                                shouldbe_amyloidbaseline_to_amyloidm24.se, "\np ", shouldbe_amyloidbaseline_to_amyloidm24.pvalue)
+shouldbe_adnimem_bl_amyloid_m24_amyloid <- paste0("Est. = ", shouldbe_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                 shouldbe_amyloidbaseline_to_amyloidm24.se, "\np ", shouldbe_amyloidbaseline_to_amyloidm24.pvalue)
 
-shouldbe_adnimem_bl_cog_m24_cog <- paste0("Est. = ", shouldbe_adnimembaseline_to_adnimemm24.beta, "\nSE = ",
-                                        shouldbe_adnimembaseline_to_adnimemm24.se, "\np ", shouldbe_adnimembaseline_to_adnimemm24.pvalue)
+shouldbe_adnimem_bl_cog_m24_cog <- paste0("Est. = ", shouldbe_adnimembaseline_to_adnimemm24.beta)
+# , "\nSE = ",
+#                                         shouldbe_adnimembaseline_to_adnimemm24.se, "\np ", shouldbe_adnimembaseline_to_adnimemm24.pvalue)
 
-shouldbe_adnimem_bl_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adnimem24.beta, "\nSE = ",
-                                            shouldbe_amyloidbaseline_to_adnimem24.se, "\np = ", shouldbe_amyloidbaseline_to_adnimem24.pvalue)
+shouldbe_adnimem_bl_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adnimem24.beta)
+# , "\nSE = ",
+#                                             shouldbe_amyloidbaseline_to_adnimem24.se, "\np = ", shouldbe_amyloidbaseline_to_adnimem24.pvalue)
 
-shouldbe_adnimem_bl_cog_m24_amyloid <- paste0("Est. = ", shouldbe_adnimembaseline_to_amyloidm24.beta, "\nSE = ",
-                                            shouldbe_adnimembaseline_to_amyloidm24.se, "\np ", shouldbe_adnimembaseline_to_amyloidm24.pvalue)
+shouldbe_adnimem_bl_cog_m24_amyloid <- paste0("Est. = ", shouldbe_adnimembaseline_to_amyloidm24.beta)
+# , "\n Fixed")
+                                            #   ,
+                                            # shouldbe_adnimembaseline_to_amyloidm24.se, "\np ", shouldbe_adnimembaseline_to_amyloidm24.pvalue)
 
 
 shouldbe_adnimem_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = shouldbe_adnimem_bl_amyloid_bl_cog,
@@ -1219,23 +1598,30 @@ shouldbe_adnimem_figure
 
 ### ADNI EF FIGURES
 
-engage_adnief_bl_amyloid_bl_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adniefbaseline.beta, "\nSE = ",
-                                           engage_amyloidbaseline_to_adniefbaseline.se, "\np ", engage_amyloidbaseline_to_adniefbaseline.pvalue)
+engage_adnief_bl_amyloid_bl_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adniefbaseline.beta)
+# , "\nSE = ",
+#                                            engage_amyloidbaseline_to_adniefbaseline.se, "\np ", engage_amyloidbaseline_to_adniefbaseline.pvalue)
 
-engage_adnief_m24_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidm24_to_adniefm24.beta, "\nSE = ",
-                                             engage_amyloidm24_to_adniefm24.se, "\np = ", engage_amyloidm24_to_adniefm24.pvalue)
+engage_adnief_m24_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidm24_to_adniefm24.beta)
+# , "\nSE = ",
+#                                              engage_amyloidm24_to_adniefm24.se, "\np = ", engage_amyloidm24_to_adniefm24.pvalue)
 
-engage_adnief_bl_amyloid_m24_amyloid <- paste0("Est. = ", engage_amyloidbaseline_to_amyloidm24.beta, "\nSE = ",
-                                                engage_amyloidbaseline_to_amyloidm24.se, "\np ", engage_amyloidbaseline_to_amyloidm24.pvalue)
+engage_adnief_bl_amyloid_m24_amyloid <- paste0("Est. = ", engage_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                 engage_amyloidbaseline_to_amyloidm24.se, "\np ", engage_amyloidbaseline_to_amyloidm24.pvalue)
 
-engage_adnief_bl_cog_m24_cog <- paste0("Est. = ", engage_adniefbaseline_to_adniefm24.beta, "\nSE = ",
-                                        engage_adniefbaseline_to_adniefm24.se, "\np ", engage_adniefbaseline_to_adniefm24.pvalue)
+engage_adnief_bl_cog_m24_cog <- paste0("Est. = ", engage_adniefbaseline_to_adniefm24.beta)
+# , "\nSE = ",
+#                                         engage_adniefbaseline_to_adniefm24.se, "\np ", engage_adniefbaseline_to_adniefm24.pvalue)
 
-engage_adnief_bl_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adnief24.beta, "\nSE = ",
-                                            engage_amyloidbaseline_to_adnief24.se, "\np = ", engage_amyloidbaseline_to_adnief24.pvalue)
+engage_adnief_bl_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adnief24.beta)
+# , "\nSE = ",
+#                                             engage_amyloidbaseline_to_adnief24.se, "\np = ", engage_amyloidbaseline_to_adnief24.pvalue)
 
-engage_adnief_bl_cog_m24_amyloid <- paste0("Est. = ", engage_adniefbaseline_to_amyloidm24.beta, "\nSE = ",
-                                            engage_adniefbaseline_to_amyloidm24.se, "\np ", engage_adniefbaseline_to_amyloidm24.pvalue)
+engage_adnief_bl_cog_m24_amyloid <- paste0("Est. = ", engage_adniefbaseline_to_amyloidm24.beta)
+# , "\n Fixed")
+#                                            # "\nSE = ",
+                                           #  engage_adniefbaseline_to_amyloidm24.se, "\np ", engage_adniefbaseline_to_amyloidm24.pvalue)
 
 
 engage_adnief_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = engage_adnief_bl_amyloid_bl_cog,
@@ -1246,23 +1632,30 @@ engage_adnief_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = engage_
                                               bl_cog_to_m24_amyloid     = engage_adnief_bl_cog_m24_amyloid)
 engage_adnief_figure
 
-donanemab_adnief_bl_amyloid_bl_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adniefbaseline.beta, "\nSE = ",
-                                          donanemab_amyloidbaseline_to_adniefbaseline.se, "\np ", donanemab_amyloidbaseline_to_adniefbaseline.pvalue)
+donanemab_adnief_bl_amyloid_bl_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adniefbaseline.beta)
+# , "\nSE = ",
+#                                           donanemab_amyloidbaseline_to_adniefbaseline.se, "\np ", donanemab_amyloidbaseline_to_adniefbaseline.pvalue)
 
-donanemab_adnief_m24_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidm24_to_adniefm24.beta, "\nSE = ",
-                                            donanemab_amyloidm24_to_adniefm24.se, "\np = ", donanemab_amyloidm24_to_adniefm24.pvalue)
+donanemab_adnief_m24_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidm24_to_adniefm24.beta)
+# , "\nSE = ",
+#                                             donanemab_amyloidm24_to_adniefm24.se, "\np = ", donanemab_amyloidm24_to_adniefm24.pvalue)
 
-donanemab_adnief_bl_amyloid_m24_amyloid <- paste0("Est. = ", donanemab_amyloidbaseline_to_amyloidm24.beta, "\nSE = ",
-                                               donanemab_amyloidbaseline_to_amyloidm24.se, "\np ", donanemab_amyloidbaseline_to_amyloidm24.pvalue)
+donanemab_adnief_bl_amyloid_m24_amyloid <- paste0("Est. = ", donanemab_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                donanemab_amyloidbaseline_to_amyloidm24.se, "\np ", donanemab_amyloidbaseline_to_amyloidm24.pvalue)
 
-donanemab_adnief_bl_cog_m24_cog <- paste0("Est. = ", donanemab_adniefbaseline_to_adniefm24.beta, "\nSE = ",
-                                       donanemab_adniefbaseline_to_adniefm24.se, "\np ", donanemab_adniefbaseline_to_adniefm24.pvalue)
+donanemab_adnief_bl_cog_m24_cog <- paste0("Est. = ", donanemab_adniefbaseline_to_adniefm24.beta)
+# , "\nSE = ",
+#                                        donanemab_adniefbaseline_to_adniefm24.se, "\np ", donanemab_adniefbaseline_to_adniefm24.pvalue)
 
-donanemab_adnief_bl_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adnief24.beta, "\nSE = ",
-                                           donanemab_amyloidbaseline_to_adnief24.se, "\np = ", donanemab_amyloidbaseline_to_adnief24.pvalue)
+donanemab_adnief_bl_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adnief24.beta)
+# , "\nSE = ",
+#                                            donanemab_amyloidbaseline_to_adnief24.se, "\np = ", donanemab_amyloidbaseline_to_adnief24.pvalue)
 
-donanemab_adnief_bl_cog_m24_amyloid <- paste0("Est. = ", donanemab_adniefbaseline_to_amyloidm24.beta, "\nSE = ",
-                                           donanemab_adniefbaseline_to_amyloidm24.se, "\np ", donanemab_adniefbaseline_to_amyloidm24.pvalue)
+donanemab_adnief_bl_cog_m24_amyloid <- paste0("Est. = ", donanemab_adniefbaseline_to_amyloidm24.beta)
+# , "\n Fixed")
+                                           #    "\nSE = ",
+                                           # donanemab_adniefbaseline_to_amyloidm24.se, "\np ", donanemab_adniefbaseline_to_amyloidm24.pvalue)
 
 donanemab_adnief_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = donanemab_adnief_bl_amyloid_bl_cog,
                                              m24_amyloid_to_m24_cog    = donanemab_adnief_m24_amyloid_m24_cog,
@@ -1273,39 +1666,125 @@ donanemab_adnief_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = dona
 donanemab_adnief_figure
 
 
-shouldbe_adnief_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = shouldbe_amyloidbaseline_to_adniefbaseline,
-                                                m24_amyloid_to_m24_cog    = shouldbe_amyloidm24_to_adniefm24,
-                                                bl_amyloid_to_m24_amyloid = shouldbe_amyloidbaseline_to_amyloidm24,
-                                                bl_cog_to_m24_cog         = shouldbe_adniefbaseline_to_adniefm24,
-                                                bl_amyloid_to_m24_cog     = shouldbe_amyloidbaseline_to_adnief24,
-                                                bl_cog_to_m24_amyloid     = shouldbe_adniefbaseline_to_amyloidm24)
+shouldbe_adnief_bl_amyloid_bl_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adniefbaseline.beta)
+# , "\nSE = ",
+#                                              shouldbe_amyloidbaseline_to_adniefbaseline.se, "\np ", shouldbe_amyloidbaseline_to_adniefbaseline.pvalue)
+
+shouldbe_adnief_m24_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidm24_to_adniefm24.beta)
+# , "\nSE = ",
+#                                                shouldbe_amyloidm24_to_adniefm24.se, "\np = ", shouldbe_amyloidm24_to_adniefm24.pvalue)
+
+shouldbe_adnief_bl_amyloid_m24_amyloid <- paste0("Est. = ", shouldbe_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                   shouldbe_amyloidbaseline_to_amyloidm24.se, "\np ", shouldbe_amyloidbaseline_to_amyloidm24.pvalue)
+
+shouldbe_adnief_bl_cog_m24_cog <- paste0("Est. = ", shouldbe_adniefbaseline_to_adniefm24.beta)
+# , "\nSE = ",
+#                                           shouldbe_adniefbaseline_to_adniefm24.se, "\np ", shouldbe_adniefbaseline_to_adniefm24.pvalue)
+
+shouldbe_adnief_bl_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adnief24.beta)
+# , "\nSE = ",
+#                                               shouldbe_amyloidbaseline_to_adnief24.se, "\np = ", shouldbe_amyloidbaseline_to_adnief24.pvalue)
+
+shouldbe_adnief_bl_cog_m24_amyloid <- paste0("Est. = ", shouldbe_adniefbaseline_to_amyloidm24.beta)
+# , "\n Fixed")
+
+shouldbe_adnief_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = shouldbe_adnief_bl_amyloid_bl_cog,
+                                                m24_amyloid_to_m24_cog    = shouldbe_adnief_m24_amyloid_m24_cog,
+                                                bl_amyloid_to_m24_amyloid = shouldbe_adnief_bl_amyloid_m24_amyloid,
+                                                bl_cog_to_m24_cog         = shouldbe_adnief_bl_cog_m24_cog,
+                                                bl_amyloid_to_m24_cog     = shouldbe_adnief_bl_amyloid_m24_cog,
+                                                bl_cog_to_m24_amyloid     = shouldbe_adnief_bl_cog_m24_amyloid)
 
 ### ADAS13 FIGURES
 
-engage_adas13_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = engage_amyloidbaseline_to_adas13baseline,
-                                              m24_amyloid_to_m24_cog    = engage_amyloidm24_to_adas13m24,
-                                              bl_amyloid_to_m24_amyloid = engage_amyloidbaseline_to_amyloidm24,
-                                              bl_cog_to_m24_cog         = engage_adas13baseline_to_adas13m24,
-                                              bl_amyloid_to_m24_cog     = engage_amyloidbaseline_to_adas1324,
-                                              bl_cog_to_m24_amyloid     = engage_adas13baseline_to_amyloidm24)
+engage_adas13_bl_amyloid_bl_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adas13baseline.beta)
+# , "\nSE = ",
+#                                             engage_amyloidbaseline_to_adas13baseline.se, "\np ", engage_amyloidbaseline_to_adas13baseline.pvalue)
 
-donanemab_adas13_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = donanemab_amyloidbaseline_to_adas13baseline,
-                                                 m24_amyloid_to_m24_cog    = donanemab_amyloidm24_to_adas13m24,
-                                                 bl_amyloid_to_m24_amyloid = donanemab_amyloidbaseline_to_amyloidm24,
-                                                 bl_cog_to_m24_cog         = donanemab_adas13baseline_to_adas13m24,
-                                                 bl_amyloid_to_m24_cog     = donanemab_amyloidbaseline_to_adas1324,
-                                                 bl_cog_to_m24_amyloid     = donanemab_adas13baseline_to_amyloidm24)
+engage_adas13_m24_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidm24_to_adas13m24.beta)
+# , "\nSE = ",
+#                                               engage_amyloidm24_to_adas13m24.se, "\np = ", engage_amyloidm24_to_adas13m24.pvalue)
 
-shouldbe_adas13_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog      = shouldbe_amyloidbaseline_to_adas13baseline,
-                                                m24_amyloid_to_m24_cog    = shouldbe_amyloidm24_to_adas13m24,
-                                                bl_amyloid_to_m24_amyloid = shouldbe_amyloidbaseline_to_amyloidm24,
-                                                bl_cog_to_m24_cog         = shouldbe_adas13baseline_to_adas13m24,
-                                                bl_amyloid_to_m24_cog     = shouldbe_amyloidbaseline_to_adas1324,
-                                                bl_cog_to_m24_amyloid     = shouldbe_adas13baseline_to_amyloidm24)
+engage_adas13_bl_amyloid_m24_amyloid <- paste0("Est. = ", engage_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                  engage_amyloidbaseline_to_amyloidm24.se, "\np ", engage_amyloidbaseline_to_amyloidm24.pvalue)
 
+engage_adas13_bl_cog_m24_cog <- paste0("Est. = ", engage_adas13baseline_to_adas13m24.beta)
+# , "\nSE = ",
+#                                          engage_adas13baseline_to_adas13m24.se, "\np ", engage_adas13baseline_to_adas13m24.pvalue)
 
-brain_jpg <- image_read("C:/Users/zkunicki/Documents/Research/In Progress/YMCA 2021/ADNI_amyloid_generalizability/Images/brain.jpg")
+engage_adas13_bl_amyloid_m24_cog <- paste0("Est. = ", engage_amyloidbaseline_to_adas1324.beta)
+# , "\nSE = ",
+#                                              engage_amyloidbaseline_to_adas1324.se, "\np = ", engage_amyloidbaseline_to_adas1324.pvalue)
 
-test_plot_with_image <- shouldbe_adas13_figure +
-  annotation_raster(brain_jpg, xmin = 70, xmax=80, ymin=70, ymax=80)
+engage_adas13_bl_cog_m24_amyloid <- paste0("Est. = ", engage_adas13baseline_to_amyloidm24.beta)
+# , "\n Fixed")
+
+engage_adas13_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog       = engage_adas13_bl_amyloid_bl_cog,
+                                              m24_amyloid_to_m24_cog    = engage_adas13_m24_amyloid_m24_cog,
+                                              bl_amyloid_to_m24_amyloid = engage_adas13_bl_amyloid_m24_amyloid,
+                                              bl_cog_to_m24_cog         = engage_adas13_bl_cog_m24_cog,
+                                              bl_amyloid_to_m24_cog     = engage_adas13_bl_amyloid_m24_cog,
+                                              bl_cog_to_m24_amyloid     = engage_adas13_bl_cog_m24_amyloid)
+
+donanemab_adas13_bl_amyloid_bl_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adas13baseline.beta)
+# , "\nSE = ",
+#                                           donanemab_amyloidbaseline_to_adas13baseline.se, "\np ", donanemab_amyloidbaseline_to_adas13baseline.pvalue)
+
+donanemab_adas13_m24_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidm24_to_adas13m24.beta)
+# , "\nSE = ",
+#                                             donanemab_amyloidm24_to_adas13m24.se, "\np = ", donanemab_amyloidm24_to_adas13m24.pvalue)
+
+donanemab_adas13_bl_amyloid_m24_amyloid <- paste0("Est. = ", donanemab_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                donanemab_amyloidbaseline_to_amyloidm24.se, "\np ", donanemab_amyloidbaseline_to_amyloidm24.pvalue)
+
+donanemab_adas13_bl_cog_m24_cog <- paste0("Est. = ", donanemab_adas13baseline_to_adas13m24.beta)
+# , "\nSE = ",
+#                                        donanemab_adas13baseline_to_adas13m24.se, "\np ", donanemab_adas13baseline_to_adas13m24.pvalue)
+
+donanemab_adas13_bl_amyloid_m24_cog <- paste0("Est. = ", donanemab_amyloidbaseline_to_adas1324.beta)
+# , "\nSE = ",
+#                                            donanemab_amyloidbaseline_to_adas1324.se, "\np = ", donanemab_amyloidbaseline_to_adas1324.pvalue)
+
+donanemab_adas13_bl_cog_m24_amyloid <- paste0("Est. = ", donanemab_adas13baseline_to_amyloidm24.beta)
+# , "\n Fixed")
+
+donanemab_adas13_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog       = donanemab_adas13_bl_amyloid_bl_cog,
+                                             m24_amyloid_to_m24_cog    = donanemab_adas13_m24_amyloid_m24_cog,
+                                             bl_amyloid_to_m24_amyloid = donanemab_adas13_bl_amyloid_m24_amyloid,
+                                             bl_cog_to_m24_cog         = donanemab_adas13_bl_cog_m24_cog,
+                                             bl_amyloid_to_m24_cog     = donanemab_adas13_bl_amyloid_m24_cog,
+                                             bl_cog_to_m24_amyloid     = donanemab_adas13_bl_cog_m24_amyloid)
+
+shouldbe_adas13_bl_amyloid_bl_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adas13baseline.beta)
+# , "\nSE = ",
+#                                              shouldbe_amyloidbaseline_to_adas13baseline.se, "\np ", shouldbe_amyloidbaseline_to_adas13baseline.pvalue)
+
+shouldbe_adas13_m24_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidm24_to_adas13m24.beta)
+# , "\nSE = ",
+#                                                shouldbe_amyloidm24_to_adas13m24.se, "\np = ", shouldbe_amyloidm24_to_adas13m24.pvalue)
+
+shouldbe_adas13_bl_amyloid_m24_amyloid <- paste0("Est. = ", shouldbe_amyloidbaseline_to_amyloidm24.beta)
+# , "\nSE = ",
+#                                                   shouldbe_amyloidbaseline_to_amyloidm24.se, "\np ", shouldbe_amyloidbaseline_to_amyloidm24.pvalue)
+
+shouldbe_adas13_bl_cog_m24_cog <- paste0("Est. = ", shouldbe_adas13baseline_to_adas13m24.beta)
+# , "\nSE = ",
+#                                           shouldbe_adas13baseline_to_adas13m24.se, "\np ", shouldbe_adas13baseline_to_adas13m24.pvalue)
+
+shouldbe_adas13_bl_amyloid_m24_cog <- paste0("Est. = ", shouldbe_amyloidbaseline_to_adas1324.beta)
+# , "\nSE = ",
+#                                               shouldbe_amyloidbaseline_to_adas1324.se, "\np = ", shouldbe_amyloidbaseline_to_adas1324.pvalue)
+
+shouldbe_adas13_bl_cog_m24_amyloid <- paste0("Est. = ", shouldbe_adas13baseline_to_amyloidm24.beta)
+# , "\n Fixed")
+
+shouldbe_adas13_figure <- generate_clpm_figure(bl_amyloid_to_bl_cog       = shouldbe_adas13_bl_amyloid_bl_cog,
+                                                m24_amyloid_to_m24_cog    = shouldbe_adas13_m24_amyloid_m24_cog,
+                                                bl_amyloid_to_m24_amyloid = shouldbe_adas13_bl_amyloid_m24_amyloid,
+                                                bl_cog_to_m24_cog         = shouldbe_adas13_bl_cog_m24_cog,
+                                                bl_amyloid_to_m24_cog     = shouldbe_adas13_bl_amyloid_m24_cog,
+                                                bl_cog_to_m24_amyloid     = shouldbe_adas13_bl_cog_m24_amyloid)
 

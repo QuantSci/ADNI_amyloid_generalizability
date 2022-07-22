@@ -32,21 +32,19 @@ unweighteddata <- left_join(merge2, uw_cog_data, by = "RID") %>%
 # Create CLPM code for different cognition outcomes
 
 clpm_model_adnimem <- 'm24_adni_mem ~ bl_adni_mem +  bl_composite
-                       m24_composite ~ 1.35*bl_adni_mem + bl_composite
+                       m24_composite ~ bl_adni_mem + bl_composite
                        m24_adni_mem ~ m24_composite
                        bl_adni_mem ~ bl_composite'
 
 clpm_model_adnief <- 'm24_adni_ef ~ bl_adni_ef + bl_composite
-                      m24_composite ~ .053*bl_adni_ef + bl_composite
+                      m24_composite ~ bl_adni_ef + bl_composite
                       m24_adni_ef ~ m24_composite
                       bl_adni_ef ~ bl_composite'
 
 clpm_model_adas13 <- 'm24_adas13 ~ bl_adas13 + bl_composite
-                      m24_composite ~ -.197*bl_adas13 + bl_composite
+                      m24_composite ~ bl_adas13 + bl_composite
                       m24_adas13 ~ m24_composite
                       bl_adas13 ~ bl_composite'
-
-### Remember each has one n.s. pathway fixed to unstandardized estimate for model identification
 
 # Run CLPMs -- overall sample
 
