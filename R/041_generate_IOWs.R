@@ -676,12 +676,13 @@ stdmeandiff_plot <-
   theme_classic() +
   xlab("Effect size") +
   theme(axis.title.y = element_blank(),
-        legend.position = "none")
+        legend.position = "none") +
+  labs(tag = "A")
 
 
 width.is <- 6
 height.is <- 3.7
-scale.is <- .9
+scale.is <- .5
 
 ggsave( "stdmeandiffplot.pdf" ,
         plot = stdmeandiff_plot ,
@@ -712,7 +713,8 @@ proboverlap_plot <- ggplot() +
   theme_classic() +
   theme(legend.position = "none") +
   ylab("Density") +
-  scale_x_continuous(name = "Probability", breaks = c(0, 1))
+  scale_x_continuous(name = "Probability", breaks = c(0, 1)) +
+  labs(tag = "B")
 
 
 ggsave( "proboverlap_plot.pdf" ,
@@ -726,6 +728,26 @@ ggsave( "proboverlap_plot.pdf" ,
 proboverlap <- pdftools::pdf_render_page("proboverlap_plot.pdf", page = 1, dpi = 600)
 
 png::writePNG(proboverlap, "proboverlap.png")
+
+
+figure2_combined <- gridExtra::grid.arrange(stdmeandiff_plot, proboverlap_plot, ncol = 2)
+
+ggsave( "figure2_combined.pdf" ,
+        plot = figure2_combined ,
+        device = NULL ,
+        scale = 1.5 ,
+        width = width.is ,
+        height = height.is ,
+        units = "in" )
+
+ggsave( "figure2_combined.png" ,
+        plot = figure2_combined ,
+        device = NULL ,
+        scale = 1.5 ,
+        width = width.is ,
+        height = height.is ,
+        units = "in" )
+
 
 ## All looks good - save harmonized data out to have weights
 

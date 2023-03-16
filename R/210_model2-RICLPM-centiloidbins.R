@@ -48,23 +48,8 @@ clpm_model_adas13 <- 'm24_adas13 ~ bl_adas13 + bl_composite
 
 # Run CLPMs -- overall sample
 
-clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
-                            data = unweighteddata,
-                            missing = "ml",
-                            estimator = "MLR",
-                            sampling.weights = "scaled_weights",
-                            fixed.x = FALSE)
-
-summary(clpm_adnimem, fit.measures = T, standardized = T)
-
-clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
-                           data = unweighteddata,
-                           missing = "ml",
-                           estimator = "MLR",
-                           sampling.weights = "scaled_weights",
-                           fixed.x = FALSE)
-
-summary(clpm_adnief, fit.measures = T, standardized = T)
+# ADAS-13
+# Weighted Results
 
 clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
                            data = unweighteddata,
@@ -74,6 +59,57 @@ clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
                            fixed.x = FALSE)
 
 summary(clpm_adas13, fit.measures = T, standardized = T)
+
+# Unweighted Results
+unwt_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                                data = unweighteddata,
+                                missing = "ml",
+                                estimator = "MLR",
+                                fixed.x = FALSE)
+
+summary(unwt_clpm_adas13, fit.measures = T, standardized = T)
+
+# ADNI-MEM
+
+clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
+                            data = unweighteddata,
+                            missing = "ml",
+                            estimator = "MLR",
+                            sampling.weights = "scaled_weights",
+                            fixed.x = FALSE)
+
+summary(clpm_adnimem, fit.measures = T, standardized = T)
+
+# Unweighted Results
+
+unwt_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
+                                 data = unweighteddata,
+                                 missing = "ml",
+                                 estimator = "MLR",
+                                 fixed.x = FALSE)
+
+
+summary(unwt_clpm_adnimem, fit.measures = T, standardized = T)
+
+# ADNI-EF
+clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
+                           data = unweighteddata,
+                           missing = "ml",
+                           estimator = "MLR",
+                           sampling.weights = "scaled_weights",
+                           fixed.x = FALSE)
+
+summary(clpm_adnief, fit.measures = T, standardized = T)
+
+unwt_clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
+                           data = unweighteddata,
+                           missing = "ml",
+                           estimator = "MLR",
+                           fixed.x = FALSE)
+
+summary(unwt_clpm_adnief, fit.measures = T, standardized = T)
+
+
 
 # ENGAGE CRITERIA
 
