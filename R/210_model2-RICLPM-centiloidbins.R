@@ -116,6 +116,27 @@ summary(unwt_clpm_adnief, fit.measures = T, standardized = T)
 engage_subset <- unweighteddata %>%
   filter(bl_wholecereb > 25)
 
+engage_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                                  data = engage_subset,
+                                  missing = "ml",
+                                  estimator = "MLR",
+                                  sampling.weights = "scaled_weights",
+                                  fixed.x = FALSE)
+
+summary(engage_clpm_adas13, fit.measures = T, standardized = T)
+
+engage_adas13_results <- summary(engage_clpm_adas13, standardized = T)
+
+unwt_engage_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                                  data = engage_subset,
+                                  missing = "ml",
+                                  estimator = "MLR",
+                                  fixed.x = FALSE)
+
+
+summary(unwt_engage_clpm_adas13, fit.measures = T, standardized = T)
+
+
 engage_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
                                    data = engage_subset,
                                    missing = "ml",
@@ -125,7 +146,14 @@ engage_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
 
 summary(engage_clpm_adnimem, fit.measures = T, standardized = T)
 
-engage_adnimem_results <- summary(engage_clpm_adnimem, standardized = T)
+unwt_engage_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
+                                   data = engage_subset,
+                                   missing = "ml",
+                                   estimator = "MLR",
+                                   fixed.x = FALSE)
+
+summary(unwt_engage_clpm_adnimem, fit.measures = T, standardized = T)
+
 
 engage_clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
                                   data = engage_subset,
@@ -138,20 +166,37 @@ summary(engage_clpm_adnief, fit.measures = T, standardized = T)
 
 engage_adnief_results <- summary(engage_clpm_adnief, standardized = T)
 
-engage_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+unwt_engage_clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
                                   data = engage_subset,
                                   missing = "ml",
                                   estimator = "MLR",
-                                  sampling.weights = "scaled_weights",
                                   fixed.x = FALSE)
-summary(engage_clpm_adas13, fit.measures = T, standardized = T)
 
-engage_adas13_results <- summary(engage_clpm_adas13, standardized = T)
+summary(unwt_engage_clpm_adnief, fit.measures = T, standardized = T)
+
+
 
 # donanemab CRITERIA
 
 donanemab_subset <- unweighteddata %>%
   filter(bl_wholecereb > 36)
+
+donanemab_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                                     data = donanemab_subset,
+                                     missing = "ml",
+                                     estimator = "MLR",
+                                     sampling.weights = "scaled_weights",
+                                     fixed.x = FALSE)
+summary(donanemab_clpm_adas13, fit.measures = T, standardized = T)
+
+donanemab_adas13_results <- summary(donanemab_clpm_adas13, standardized = T)
+
+unwt_donanemab_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                                     data = donanemab_subset,
+                                     missing = "ml",
+                                     estimator = "MLR",
+                                     fixed.x = FALSE)
+summary(unwt_donanemab_clpm_adas13, fit.measures = T, standardized = T)
 
 donanemab_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
                                    data = donanemab_subset,
@@ -164,6 +209,15 @@ summary(donanemab_clpm_adnimem, fit.measures = T, standardized = T)
 
 donanemab_adnimem_results <- summary(donanemab_clpm_adnimem, standardized = T)
 
+unwt_donanemab_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
+                                      data = donanemab_subset,
+                                      missing = "ml",
+                                      estimator = "MLR",
+                                      fixed.x = FALSE)
+
+summary(unwt_donanemab_clpm_adnimem, fit.measures = T, standardized = T)
+
+
 donanemab_clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
                                   data = donanemab_subset,
                                   missing = "ml",
@@ -175,20 +229,37 @@ summary(donanemab_clpm_adnief, fit.measures = T, standardized = T)
 
 donanemab_adnief_results <- summary(donanemab_clpm_adnief, standardized = T)
 
-donanemab_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
-                                  data = donanemab_subset,
-                                  missing = "ml",
-                                  estimator = "MLR",
-                                  sampling.weights = "scaled_weights",
-                                  fixed.x = FALSE)
-summary(donanemab_clpm_adas13, fit.measures = T, standardized = T)
+unwt_donanemab_clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
+                                     data = donanemab_subset,
+                                     missing = "ml",
+                                     estimator = "MLR",
+                                     fixed.x = FALSE)
 
-donanemab_adas13_results <- summary(donanemab_clpm_adas13, standardized = T)
+summary(unwt_donanemab_clpm_adnief, fit.measures = T, standardized = T)
 
 # shouldbe CRITERIA
 
 shouldbe_subset <- unweighteddata %>%
   filter(between(bl_wholecereb, 15, 50))
+
+shouldbe_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                                    data = shouldbe_subset,
+                                    missing = "ml",
+                                    estimator = "MLR",
+                                    sampling.weights = "scaled_weights",
+                                    fixed.x = FALSE)
+
+summary(shouldbe_clpm_adas13, fit.measures = T, standardized = T)
+
+shouldbe_adas13_results <- summary(shouldbe_clpm_adas13, standardized = T)
+
+unwt_shouldbe_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
+                                    data = shouldbe_subset,
+                                    missing = "ml",
+                                    estimator = "MLR",
+                                    fixed.x = FALSE)
+
+summary(unwt_shouldbe_clpm_adas13, fit.measures = T, standardized = T)
 
 shouldbe_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
                                    data = shouldbe_subset,
@@ -201,6 +272,14 @@ summary(shouldbe_clpm_adnimem, fit.measures = T, standardized = T)
 
 shouldbe_adnimem_results <- summary(shouldbe_clpm_adnimem, standardized = T)
 
+unwt_shouldbe_clpm_adnimem <- lavaan::sem(model = clpm_model_adnimem,
+                                     data = shouldbe_subset,
+                                     missing = "ml",
+                                     estimator = "MLR",
+                                     fixed.x = FALSE)
+
+summary(unwt_shouldbe_clpm_adnimem, fit.measures = T, standardized = T)
+
 shouldbe_clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
                                   data = shouldbe_subset,
                                   missing = "ml",
@@ -212,16 +291,15 @@ summary(shouldbe_clpm_adnief, fit.measures = T, standardized = T)
 
 shouldbe_adnief_results <- summary(shouldbe_clpm_adnief, standardized = T)
 
-shouldbe_clpm_adas13 <- lavaan::sem(model = clpm_model_adas13,
-                                  data = shouldbe_subset,
-                                  missing = "ml",
-                                  estimator = "MLR",
-                                  sampling.weights = "scaled_weights",
-                                  fixed.x = FALSE)
+unwt_shouldbe_clpm_adnief <- lavaan::sem(model = clpm_model_adnief,
+                                    data = shouldbe_subset,
+                                    missing = "ml",
+                                    estimator = "MLR",
+                                    fixed.x = FALSE)
 
-summary(shouldbe_clpm_adas13, fit.measures = T, standardized = T)
+summary(unwt_shouldbe_clpm_adnief, fit.measures = T, standardized = T)
 
-shouldbe_adas13_results <- summary(shouldbe_clpm_adas13, standardized = T)
+
 
 ## Save out results
 
